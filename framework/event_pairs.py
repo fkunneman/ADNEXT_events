@@ -34,12 +34,12 @@ class Event_pairs:
         else:
             self.cities = False
         if f:
-            c = "/vol/customopt/uvt-ru/etc/frog/frog-twitter.cfg"
+            c = "/vol/customopt/lamachine/etc/frog/frog-twitter.cfg"
             fo = frog.FrogOptions()
             self.frogger = frog.Frog(fo,c)
         else:
             self.frogger = False
-        self.ucto_settingsfile = "/vol/customopt/uvt-ru/etc/ucto/tokconfig-nl-twitter"
+        self.ucto_settingsfile = "/vol/customopt/lamachine/etc/ucto/tokconfig-nl-twitter"
 
     #total procedure of event extraction in one function
     def detect_events(self,tweetfile,events = True):
@@ -399,7 +399,7 @@ class Event_pairs:
                 info.append(", ".join(tweet.cities))
             else:
                 info.append("-")
-            print(info)
+            #print(info)
             tweetinfo.write("\t".join(info) + "\n")
         tweetinfo.close()
 
