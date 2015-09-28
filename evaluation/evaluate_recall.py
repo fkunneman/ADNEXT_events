@@ -11,14 +11,20 @@ tfs = sys.argv[4:] # stream of tweets
 
 # 1: read in gold standard --> sorted event term - time
 print('Reading gold standard file')
+gold_standard_events = []
 gold_standard = []
 with open(fgs, encoding = 'utf-8') as gs:
     for line in gs.readlines():
         event_date = line.strip().split('\t')
         event_date[1] = time_functions.return_datetime(event_date[1])
-        gold_standard.append(event_date)
+        if event_date[0] not in gold_standard_events:
+            gold_standard.append(event_date)
+            gold_standard_events.append(event_date[0])
 gold_standard = sorted(gold_standard, key = lambda k : k[1])
-
+for event in gold_standard:
+    sys.stdout.buffer.write(event[0].encode('utf8'))
+    print(' ', event[1])
+    
 # 2: read in extracted events --> sorted event terms, time
 print('Reading extracted events file')
 extracted_events = []
@@ -28,6 +34,9 @@ with open(fee, encoding = 'utf-8') as ee:
         event_date = [date_event[1].split(', '), time_functions.return_datetime(date_event[0], setting = 'vs')]
         extracted_events.append(event_date)
 extracted_events = sorted(extracted_events, key = lambda k : k[1])
+#for event in extracted_events:
+#    sys.stdout.buffer.write(', '.join(event[0]).encode('utf8'))
+#    print('')
 
 # 3: read in tweets
 print('Reading tweet files')
