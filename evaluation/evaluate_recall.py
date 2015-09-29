@@ -110,7 +110,9 @@ cc.set_lines(tweets)
 cc.simple_tokenize()
 cc.set_file()
 cc.model(0, 10)
-cc.match(gold_standard_events)
+matches = cc.match(gold_standard_events)
+
+
 
 # event_found = defaultdict(int)
 # event_found_date = {}
@@ -122,6 +124,11 @@ cc.match(gold_standard_events)
 #             event_found_date[ev[0]] = str(ev[1].date())
 #             event_found_tweets[ev[0]].append(tweet)
 
+print('Writing to file')
 with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
-    for event in event_found.keys():
-        outfile.write(event + '\t' + event_found_date[event] + '\t' + str(event_found[event]) + '\t' + '-----'.join(event_found_tweets[event]) + '\n')
+    for event in gold_standard:
+        if matches[event[0]][0] > 0:
+            found_tweets = [tweets[i] for i in matches[event[0]][1]]
+        else:
+            found_tweets = []
+        outfile.write(event[0] + '\t' + str(event[1].date()) + '\t' + str(matches[event[0]][0]) + '\t' + '-----'.join(found_tweets) + '\n')
