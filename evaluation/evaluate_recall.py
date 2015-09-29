@@ -29,16 +29,14 @@ gold_standard = sorted(gold_standard, key = lambda k : k[1])
 #for event in gold_standard_events:
 #    sys.stdout.buffer.write(event.encode('utf8'))
 #    print(' ', event[1])
-    
-with open(of[:-4]) + '_counts.txt', 'w', encoding = 'utf-8') as outfile:
+
+with open(of[:-4] + '_counts.txt', 'w', encoding = 'utf-8') as outfile:
     for month in ['08', '09', '10', '11', '12']:
-        print(gold_standard[1][1], gold_standard[1][1][3:5])
-        count = len([x for x in gold_standard if x[1][3:5] == month]):
+        print(gold_standard[1][1], str(gold_standard[1][1])[5:7])
+        count = len([x for x in gold_standard if str(x[1])[5:7] == month])
         outfile.write(month + '\t' + str(count) + '\n')
     total = len(gold_standard)
     outfile.write('total\t' + str(total) + '\n')
-
-quit()
 
 # 2: read in extracted events --> sorted event terms, time
 print('Reading extracted events file')
@@ -115,6 +113,6 @@ for tweet in tweets:
             event_found_date[ev[0]] = str(ev[1].date())
             event_found_tweets[ev[0]].append(tweet)
 
-with open(of[:-4]) + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
+with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
     for event in event_found.keys():
         outfile.write(event + '\t' + event_found_date[event] + '\t' + str(event_found[event]) + '\t' + '-----'.join(event_found_tweets[event]) + '\n')
