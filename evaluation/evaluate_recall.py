@@ -96,7 +96,12 @@ with open(of[:-4] + '_non-matches.txt', 'w', encoding = 'utf-8') as outfile:
     outfile.write('\n'.join(['\t'.join(x) for x in non_matches]))
 
 # 3: read in tweets
+current_tmpfiles = os.listdir(tmpdir)
+print(current_tmpfiles)
+quit()
+
 print('Reading tweet files')
+
 tweets = []
 for tweetfile in tfs:
     print(tweetfile)
