@@ -5,11 +5,13 @@ import re
 from collections import defaultdict
 
 import time_functions
+import coco
 
 fgs = sys.argv[1] # gold standard
 fee = sys.argv[2] # extracted events
 of = sys.argv[3] # outfile
-tfs = sys.argv[4:] # stream of tweets
+tmpdir = sys.argv[4]
+tfs = sys.argv[5:] # stream of tweets
 
 # 1: read in gold standard --> sorted event term - time
 print('Reading gold standard file')
@@ -103,15 +105,22 @@ for tweetfile in tfs:
             columns = tweet.strip().split('\t')
             tweets.append(columns[-1])
 
-event_found = defaultdict(int)
-event_found_date = {}
-event_found_tweets = defaultdict(list)
-for tweet in tweets:
-    for ev in gold_standard:
-        if re.search(ev[0], tweet):
-            event_found[ev[0]] += 1
-            event_found_date[ev[0]] = str(ev[1].date())
-            event_found_tweets[ev[0]].append(tweet)
+cc = coco.Coco(tmpdir)
+cc.set_lines(tweets)
+cc.simple_tokenize()
+cc.set_file()
+cc.model(0, 10)
+cc.match(gold_standard_events)
+
+# event_found = defaultdict(int)
+# event_found_date = {}
+# event_found_tweets = defaultdict(list)
+# for tweet in tweets:
+#     for ev in gold_standard:
+#         if re.search(ev[0], tweet):
+#             event_found[ev[0]] += 1
+#             event_found_date[ev[0]] = str(ev[1].date())
+#             event_found_tweets[ev[0]].append(tweet)
 
 with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
     for event in event_found.keys():
