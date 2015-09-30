@@ -3,6 +3,7 @@ import sys
 import os
 import datetime
 import re
+import os
 from collections import defaultdict
 
 import time_functions
@@ -97,6 +98,7 @@ with open(of[:-4] + '_non-matches.txt', 'w', encoding = 'utf-8') as outfile:
     outfile.write('\n'.join(['\t'.join(x) for x in non_matches]))
 
 # 3: read in tweets
+
 current_tmpfiles = os.listdir(tmpdir)
 cc = coco.Coco(tmpdir)
 if 'ngrams.txt' in current_tmpfiles:
@@ -114,32 +116,14 @@ else:
     cc.simple_tokenize()
     cc.set_file()
 
-if 'ngrams.IndexedPatternModel' in current_tmpfiles:
+if 'ngrams.IndexedPatternModel_constrained' in current_tmpfiles:
     cc.load_model(tmpdir + 'ngrams.IndexedPatternModel')
 else:
-    if 'ngrams.colibri.cls' in current_tmpfiles:
-        clsfile = tmpdir + 'ngrams.colibri.cls'
-    else:
-        clsfile = False
-    if 'ngrams.colibri.cat' in current_tmpfiles:
-        datfile = tmpdir + 'ngrams.colibri.dat'
-    else:
-        datfile = False
-    cc.model(0, 10, clsfile, datfile)
+    # clsfile = tmpdir + 'ngrams.colibri.cls' if 'ngrams.colibri.cls' in current_tmpfiles else False
+    # datfile = tmpdir + 'ngrams.colibri.dat' if 'ngrams.colibri.cat' in current_tmpfiles else False
+    cc.model_ngramperline(gold_standard_events)
 
 matches = cc.match(gold_standard_events)
-
-
-
-# event_found = defaultdict(int)
-# event_found_date = {}
-# event_found_tweets = defaultdict(list)
-# for tweet in tweets:
-#     for ev in gold_standard:
-#         if re.search(ev[0], tweet):
-#             event_found[ev[0]] += 1
-#             event_found_date[ev[0]] = str(ev[1].date())
-#             event_found_tweets[ev[0]].append(tweet)
 
 print('Writing to file')
 with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
