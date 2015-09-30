@@ -98,24 +98,34 @@ with open(of[:-4] + '_non-matches.txt', 'w', encoding = 'utf-8') as outfile:
 
 # 3: read in tweets
 current_tmpfiles = os.listdir(tmpdir)
-print(current_tmpfiles)
-quit()
-
-print('Reading tweet files')
-
-tweets = []
-for tweetfile in tfs:
-    print(tweetfile)
-    with open(tweetfile, encoding = 'utf-8') as tf:
-        for tweet in tf.readlines()[1:]:
-            columns = tweet.strip().split('\t')
-            tweets.append(columns[-1])
-
 cc = coco.Coco(tmpdir)
-cc.set_lines(tweets)
-cc.simple_tokenize()
-cc.set_file()
-cc.model(0, 10)
+if 'ngrams.txt' in current_tmpfiles:
+    cc.load_file(tmpdir + 'ngrams.txt')
+else:
+    print('Reading tweet files')
+    tweets = []
+    for tweetfile in tfs:
+        print(tweetfile)
+        with open(tweetfile, encoding = 'utf-8') as tf:
+            for tweet in tf.readlines()[1:]:
+                columns = tweet.strip().split('\t')
+                tweets.append(columns[-1])
+    cc.set_lines(tweets)
+    cc.simple_tokenize()
+
+if 'ngrams.IndexedPatternModel' in current_tmpfiles:
+    cc.load_model(tmpdir + 'ngrams.IndexedPatternModel')
+else:
+    if 'ngrams.colibri.cls' in current_tmpfiles:
+        clsfile = tmpdir + 'ngrams.colibri.cls'
+    else:
+        clsfile = False
+    if 'ngrams.colibri.cat' in current_tmpfiles:
+        datfile = tmpdir + 'ngrams.colibri.dat'
+    else:
+        datfile = False
+    cc.model(0, 10, clsfile, datfile)
+
 matches = cc.match(gold_standard_events)
 
 
