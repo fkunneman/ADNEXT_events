@@ -112,6 +112,7 @@ else:
                 tweets.append(columns[-1])
     cc.set_lines(tweets)
     cc.simple_tokenize()
+    cc.set_file()
 
 if 'ngrams.IndexedPatternModel' in current_tmpfiles:
     cc.load_model(tmpdir + 'ngrams.IndexedPatternModel')
