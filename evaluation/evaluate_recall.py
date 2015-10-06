@@ -13,7 +13,8 @@ fgs = sys.argv[1] # gold standard
 fee = sys.argv[2] # extracted events
 of = sys.argv[3] # outfile
 tmpdir = sys.argv[4]
-tfs = sys.argv[5:] # stream of tweets
+twma = int(sys.argv[5])
+tfs = sys.argv[6:] # stream of tweets
 
 # 1: read in gold standard --> sorted event term - time
 print('Reading gold standard file')
@@ -23,7 +24,14 @@ gold_standard = []
 with open(fgs, encoding = 'utf-8') as gs:
     for line in gs.readlines():
         event_date = line.strip().split('\t')
-        event_date[1] = time_functions.return_datetime(event_date[1])
+        try:
+            event_date[1] = time_functions.return_datetime(event_date[1])
+            event_date[0] = event_date[0].lower()
+        except:
+            d = event_date[0]
+            e = event_date[1]
+            event_date[1] = time_functions.return_datetime(d)
+            event_date[0] = e.lower()
         if event_date[0] not in gold_standard_events:
             gold_standard.append(event_date)
             gold_standard_events.append(event_date[0])
@@ -68,6 +76,7 @@ for event_date in extracted_events:
                 break
         else:
             parts = event_term.split(' ')
+#            print(event_term, parts)
             et = [event_term]
             for l in range(2, len(parts)):
                 if l == 2:
@@ -80,15 +89,18 @@ for event_date in extracted_events:
                     et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:], parts[3:], parts[4:])])
             for part in et:
                 for ev in gold_standard:
+#                    print(part, ev, ev[0].split())
                     if re.match(part, ev[0]) or part in ev[0].split():
+                        print("MATCH")
                         matches.append((event_terms_str, ev[0], str(ev[1].date())))
                         match = True
-                        break
-                if match:
-                    break
-            if match:
-                break
+                        #break
+                #if match:
+                #    break
+            #if match:
+            #    break
     if not match:
+        #print(event_terms_str)
         non_matches.append(event_terms_str)
 
 with open(of[:-4] + '_matches.txt', 'w', encoding = 'utf-8') as outfile:
@@ -97,39 +109,40 @@ with open(of[:-4] + '_matches.txt', 'w', encoding = 'utf-8') as outfile:
 with open(of[:-4] + '_non-matches.txt', 'w', encoding = 'utf-8') as outfile:
     outfile.write('\n'.join(['\t'.join(x) for x in non_matches]))
 
-# 3: read in tweets
 
-current_tmpfiles = os.listdir(tmpdir)
-cc = coco.Coco(tmpdir)
-if 'ngrams.txt' in current_tmpfiles:
-    cc.load_file(tmpdir + 'ngrams.txt')
-else:
-    print('Reading tweet files')
-    tweets = []
-    for tweetfile in tfs:
-        print(tweetfile)
-        with open(tweetfile, encoding = 'utf-8') as tf:
-            for tweet in tf.readlines()[1:]:
-                columns = tweet.strip().split('\t')
-                tweets.append(columns[-1])
-    cc.set_lines(tweets)
-    cc.simple_tokenize()
-    cc.set_file()
+if twma:
+    # 3: read in tweets
 
-if 'ngrams.IndexedPatternModel_constrained' in current_tmpfiles:
-    cc.load_model(tmpdir + 'ngrams.IndexedPatternModel')
-else:
-    # clsfile = tmpdir + 'ngrams.colibri.cls' if 'ngrams.colibri.cls' in current_tmpfiles else False
-    # datfile = tmpdir + 'ngrams.colibri.dat' if 'ngrams.colibri.cat' in current_tmpfiles else False
-    cc.model_ngramperline(gold_standard_events)
+    current_tmpfiles = os.listdir(tmpdir)
+    cc = coco.Coco(tmpdir)
+    if 'ngrams.txt' in current_tmpfiles:
+        cc.load_file(tmpdir + 'ngrams.txt')
+    else:
+        print('Reading tweet files')
+        tweets = []
+        for tweetfile in tfs:
+            with open(tweetfile, encoding = 'utf-8') as tf:
+                for tweet in tf.readlines()[1:]:
+                    columns = tweet.strip().split('\t')
+                    tweets.append(columns[-1])
+        cc.set_lines(tweets)
+        cc.simple_tokenize()
+        cc.set_file()
 
-matches = cc.match(gold_standard_events)
+    if 'ngrams.IndexedPatternModel_constrained' in current_tmpfiles:
+        cc.load_model(tmpdir + 'ngrams.IndexedPatternModel')
+    else:
+        # clsfile = tmpdir + 'ngrams.colibri.cls' if 'ngrams.colibri.cls' in current_tmpfiles else False
+        # datfile = tmpdir + 'ngrams.colibri.dat' if 'ngrams.colibri.cat' in current_tmpfiles else False
+        cc.model_ngramperline(gold_standard_events)
 
-print('Writing to file')
-with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
-    for event in gold_standard:
-        if matches[event[0]][0] > 0:
-            found_tweets = [tweets[i] for i in matches[event[0]][1]]
-        else:
-            found_tweets = []
-        outfile.write(event[0] + '\t' + str(event[1].date()) + '\t' + str(matches[event[0]][0]) + '\t' + '-----'.join(found_tweets) + '\n')
+    matches = cc.match(gold_standard_events)
+
+    print('Writing to file')
+    with open(of[:-4] + '_tweetmatches.txt', 'w', encoding = 'utf-8') as outfile:
+        for event in gold_standard:
+            if matches[event[0]][0] > 0:
+                found_tweets = [tweets[i] for i in matches[event[0]][1]]
+            else:
+                found_tweets = []
+            outfile.write(event[0] + '\t' + str(event[1].date()) + '\t' + str(matches[event[0]][0]) + '\t' + '-----'.join(found_tweets) + '\n')
