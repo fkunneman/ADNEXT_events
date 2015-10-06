@@ -1,5 +1,6 @@
 
 import sys
+from collections import defaultdict
 
 import time_functions
 
@@ -32,12 +33,14 @@ event_month = {}
 for event in gold_standard:
     parts = event.split('\t')
     date = time_functions.return_datetime(parts[1])
-    event_month[parts[0]] = date.month
+    event_month[parts[0].lower()] = date.month
 
+month_extracted_events = defaultdict(int)
 for ee in extracted_events:
-    print(ee.split('\t'))
-    exit()
-
+    parts = ee.split('\t')
+    if len(parts) > 1:
+        month_extracted_events[event_month[parts[2]]] += 1
+print(month_extracted_events)
 
 matched = len(extracted_events) / num_gold_standard
 matched_tweets = len(tweet_matches) / num_gold_standard
