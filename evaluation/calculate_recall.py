@@ -1,6 +1,8 @@
 
 import sys
 
+import time_functions
+
 gsf = sys.argv[1]
 eem = sys.argv[2]
 tm = sys.argv[3]
@@ -25,7 +27,18 @@ for x in tweet_all:
         if x.split('\t')[2] != '0':
             tweet_matches.append(x)
 
-# 4: make calculations and output result- and plotfile 
+# 4: make calculations and output results
+event_month = {}
+for event in gold_standard:
+    parts = event.split('\t')
+    date = time_functions.return_datetime(parts[1])
+    event_month[parts[0]] = date.month
+
+for ee in extracted_events:
+    print(ee.split('\t'))
+    exit()
+
+
 matched = len(extracted_events) / num_gold_standard
 matched_tweets = len(tweet_matches) / num_gold_standard
 matched_tweets_threshold = [x for x in tweet_matches if int(x.split('\t')[2]) >= 5]
