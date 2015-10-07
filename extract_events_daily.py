@@ -26,6 +26,8 @@ parser.add_argument('-x', action='store_true',
     help = "additional postagging during ranking to correct")
 parser.add_argument('-q', action='store_true', 
     help = "Choose to output in Qualtrics format")
+parser.add_argument('-b', action='store_true', 
+    help = "Choose to -also- write events before clustering")
 parser.add_argument('--window', type = int, action = 'store', default = 7,
     help = "The window in days of tweets on which event extraction is based (default = 7 days)")
 parser.add_argument('--start', action = 'store_true',
@@ -46,6 +48,13 @@ ep = Event_pairs(args.w,args.d,cities = args.cities)
 def output_events(d):
     print("ranking events")
     ep.rank_events()
+    if args.b:
+        unclustered_events = open(d + "events_unclustered.txt","w",encoding = "utf-8")
+        for event in sorted(ep.events,key = lambda x : x.score,reverse=True):
+            outstr = "\n" + "\t".join([str(event.date),str(event.score)]) + "\t" + \
+                ", ".join([x[0] for x in event.entities]) + "\n" + \
+                "\n".join(['\t'.join([x.id, x.user, x.date, x.text] for x in event.tweets]) + "\n"
+            unclustered_events.write(outstr)
     ep.resolve_overlap_events()
     ep.enrich_events(xpos = args.x)
     if args.x:
@@ -68,7 +77,7 @@ def output_events(d):
                 eventq.write("[[Choices]]\nGoed\nMatig\nSlecht\n\n")
             outstr = "\n" + "\t".join([str(event.date),str(event.score)]) + "\t" + \
                 ", ".join([x[0] for x in event.entities]) + "\n" + \
-                "\n".join([x.text for x in event.tweets]) + "\n"
+                "\n".join('\t'.join([x.id, x.user, x.date, x.text] for x in event.tweets]) + "\n"
             eventinfo.write(outstr)
     eventinfo.close()
     if args.q:
