@@ -8,6 +8,7 @@ import coco
 def query_event_terms(event_terms, tweetfile, tmpdir = False):
     if tmpdir:
         cc = coco.Coco(tmpdir)
+        tweets = []
         with open(tweetfile, encoding = 'utf-8') as tf:
             for tweet in tf.readlines()[1:]:
                 columns = tweet.strip().split('\t')
@@ -15,9 +16,9 @@ def query_event_terms(event_terms, tweetfile, tmpdir = False):
         cc.set_lines(tweets)
         cc.simple_tokenize()
         cc.set_file()
-        cc.model_ngramperline(gold_standard_events)
-        matches = cc.match(gold_standard_events)
-        print(matches)
+        cc.model_ngramperline(event_terms)
+        matches = cc.match(event_terms)
+        return matches
 
 event_eventterms = defaultdict(list)
 eventterm_event = {}
@@ -37,13 +38,15 @@ with open(eventfile, 'r', encoding = 'utf-8') as ef:
 
 for event in events:
     e = '|'.join(event)
-    terms = event[[1]].split(',')
+    terms = event[1].split(',')
     for term in terms:
         event_eventterms[e].append(term)
         eventterm_event[term] = e
 
 tic = timeit.default_timer()
-query_event_terms(eventterm_event.keys(), sys.argv[3], tmpdir = tdir)
+m = query_event_terms(eventterm_event.keys(), sys.argv[3], tmpdir = tdir)
 toc = timeit.default_timer()
 print('time in seconds', toc - tic)
-
+#for t in m.keys():
+#    info = t + '\t' + ' '.join([str(x) for x in m[t]])
+#    print(info.encode('utf-8'))
