@@ -33,9 +33,12 @@ with open(eventfile, 'r', encoding = 'utf-8') as ef:
         if date[5:7] == '08':
             day = int(date[8:])
             if day > 6 and day < 25:
-                events.append((date, tokens[2]))  
+                events.append([date, tokens[2]])  
 
-print(events)
+events_str = '\n'.join([' '.join(x) for x in events]).encode('utf-8')
+print(events_str)
+
+sys.stdout.buffer.write(events_str)
 
 
 # >>> tic=timeit.default_timer()
