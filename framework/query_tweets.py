@@ -5,14 +5,13 @@ import timeit
 
 import coco
 
-def query_event_terms(event_terms, tweetfile, tmpdir = False):
+def query_event_terms(event_terms, tweet, tmpdir = False):
     if tmpdir:
         cc = coco.Coco(tmpdir)
-        tweets = []
-        with open(tweetfile, encoding = 'utf-8') as tf:
-            for tweet in tf.readlines()[1:]:
-                columns = tweet.strip().split('\t')
-                tweets.append(columns[-1])
+        tweets_text = []
+        for tweet in tweets:
+            columns = tweet.split('\t')
+            tweets_text.append(columns[-1])
         cc.set_lines(tweets)
         cc.simple_tokenize()
         cc.set_file()
@@ -24,7 +23,8 @@ event_eventterms = defaultdict(list)
 eventterm_event = {}
 eventfile = sys.argv[1]
 tdir = sys.argv[2]
-tf = sys.argv[3]
+outfile = sys.argv[3]
+tfs = sys.argv[4:]
 
 events = [] 
 with open(eventfile, 'r', encoding = 'utf-8') as ef:
@@ -43,10 +43,27 @@ for event in events:
         event_eventterms[e].append(term)
         eventterm_event[term] = e
 
-tic = timeit.default_timer()
-m = query_event_terms(eventterm_event.keys(), sys.argv[3], tmpdir = tdir)
-toc = timeit.default_timer()
-print('time in seconds', toc - tic)
-#for t in m.keys():
-#    info = t + '\t' + ' '.join([str(x) for x in m[t]])
-#    print(info.encode('utf-8'))
+eventterm_tweets = defaultdict(list)
+dates = []
+for tf in tfs:
+    print(tf)
+    d = tf[:8]
+    if dates[-1] != d:
+        dates.append(d)
+    tweets = []
+    with open(tf, encoding = 'utf-8') as tf:
+        for tweet in tf.readlines()[1:]:
+            tweets.append(tweet.strip())
+
+    m = query_event_terms(eventterm_event.keys(), tweets, tmpdir = tdir)
+
+    for t in m.keys():
+        if m[t][0] > 0:
+            match_tweets = [tweets[i] for i in m[t][1]]
+            eventterm_tweets[t].extend(match_tweets)
+
+with open(outfile, 'w', encoding = 'utf-8') as out:
+    for event in event_eventterms.keys():
+        outfile.write('***' + event + '\n')
+        for eventterm in event_eventterms[event]:
+            outfile.write('---' + eventterm + '\n' + '----------'.join(eventterm_tweets[eventterm]) + '\n')
