@@ -35,13 +35,15 @@ with open(eventfile, 'r', encoding = 'utf-8') as ef:
             if day > 6 and day < 25:
                 events.append([date, tokens[2]])  
 
-events_str = '\n'.join([' '.join(x) for x in events]).encode('utf-8')
-print(events_str)
+for event in events:
+    e = '|'.join(event)
+    terms = event[[1]].split(',')
+    for term in terms:
+        event_eventterms[e].append(term)
+        eventterm_event[term] = e
 
-sys.stdout.buffer.write(events_str)
+tic = timeit.default_timer()
+query_event_terms(eventterm_event.keys(), sys.argv[3], tmpdir = tdir)
+toc = timeit.default_timer()
+print('time in seconds', toc - tic)
 
-
-# >>> tic=timeit.default_timer()
-# >>> # Do Stuff
-# >>> toc=timeit.default_timer()
-# >>> toc - tic #elapsed time in seconds
