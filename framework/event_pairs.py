@@ -18,7 +18,7 @@ import event_classes
 
 class Event_pairs:
 
-    def __init__(self,wikidir=False,tmpdir=False,f = False, cities=False):
+    def __init__(self,wikidir=False,tmpdir=False,f = True, cities=False):
         self.tweets = []
         self.tmpdir = tmpdir
         if wikidir:
@@ -35,6 +35,7 @@ class Event_pairs:
             self.cities = False
         if f:
             c = "/vol/customopt/lamachine/etc/frog/frog-twitter.cfg"
+#            c = '/vol/customopt/uvt-ru.obsolete/etc/frog/frog-twitter.cfg'
             fo = frog.FrogOptions()
             self.frogger = frog.Frog(fo,c)
         else:
@@ -235,8 +236,8 @@ class Event_pairs:
                     ec = entity_count[entity]
                     ode = date_entity[date][entity]
                     g2 = calculations.goodness_of_fit(total,dc,ec,ode)
-                    # users = [x.user for x in date_entity_tweets[date][entity]]
-                    # g2_user = (len(list(set(users))) / len(users)) * g2
+                    users = [x.user for x in date_entity_tweets[date][entity]]
+                    #g2_user = (len(list(set(users))) / len(users)) * g2
                     date_entity_score.append([date,[(entity,g2)],g2,date_entity_tweets[date][entity]])
         top = sorted(date_entity_score,key = lambda x: x[2],reverse=True)[:2500]
         self.events = []
@@ -400,7 +401,7 @@ class Event_pairs:
             else:
                 info.append("-")
             #print(info)
-            tweetinfo.write("\t".join(info) + "\n")
+            tweetinfo.write("\t".join([str(x) for x in info]) + "\n")
         tweetinfo.close()
 
     def write_term_scores(self,outfile):

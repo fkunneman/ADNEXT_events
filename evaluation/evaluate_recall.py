@@ -56,7 +56,7 @@ extracted_events = []
 with open(fee, encoding = 'utf-8') as ee:
     for line in ee.readlines():
         date_event = line.strip().split('\t')
-        event_date = [date_event[1].split(', '), time_functions.return_datetime(date_event[0], setting = 'vs')]
+        event_date = [date_event[2].split(', '), time_functions.return_datetime(date_event[0], setting = 'vs')]
         extracted_events.append(event_date)
 extracted_events = sorted(extracted_events, key = lambda k : k[1])
 
@@ -69,39 +69,44 @@ for event_date in extracted_events:
     match = False
     event_terms_str = ', '.join(event_date[0])
     for event_term in event_terms:
-        if event_term[0] == '#':
-            if event_term in gold_standard_events_hashtag:
-                matches.append(event_terms_str)
-                match = True
-                break
-        else:
-            parts = event_term.split(' ')
+        try:
+            if event_term[0] == '#':
+                if event_term in gold_standard_events_hashtag:
+                    matches.append(event_terms_str)
+                    match = True
+                    break
+            else:
+                parts = event_term.split(' ')
 #            print(event_term, parts)
-            et = [event_term]
-            for l in range(2, len(parts)):
-                if l == 2:
-                    et.extend([' '.join(x) for x in zip(parts, parts[1:])])
-                elif l == 3:
-                    et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:])])
-                elif l == 4:
-                    et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:], parts[3:])])
-                elif l == 5:
-                    et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:], parts[3:], parts[4:])])
-            for part in et:
-                for ev in gold_standard:
+                et = [event_term]
+                for l in range(2, len(parts)):
+                    if l == 2:
+                        et.extend([' '.join(x) for x in zip(parts, parts[1:])])
+                    elif l == 3:
+                        et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:])])
+                    elif l == 4:
+                        et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:], parts[3:])])
+                    elif l == 5:
+                        et.extend([' '.join(x) for x in zip(parts, parts[1:], parts[2:], parts[3:], parts[4:])])
+                for part in et:
+                    for ev in gold_standard:
+#                        if ev[1] == event_date[1]:
 #                    print(part, ev, ev[0].split())
-                    if re.match(part, ev[0]) or part in ev[0].split():
-                        print("MATCH")
-                        matches.append((event_terms_str, ev[0], str(ev[1].date())))
-                        match = True
+                        if re.match(part, ev[0]) or part in ev[0].split():
+                            print("MATCH")
+                            matches.append((event_terms_str, ev[0], str(ev[1].date())))
+                            match = True
                         #break
                 #if match:
                 #    break
             #if match:
             #    break
+        except:
+            continue
     if not match:
         #print(event_terms_str)
         non_matches.append(event_terms_str)
+    
 
 with open(of[:-4] + '_matches.txt', 'w', encoding = 'utf-8') as outfile:
     outfile.write('\n'.join(['\t-\t'.join(x) for x in matches]))

@@ -53,7 +53,7 @@ def output_events(d):
         for event in sorted(ep.events,key = lambda x : x.score,reverse=True):
             outstr = "\n" + "\t".join([str(event.date),str(event.score)]) + "\t" + \
                 ", ".join([x[0] for x in event.entities]) + "\n" + \
-                "\n".join(['\t'.join([x.id, x.user, x.date, x.text] for x in event.tweets]) + "\n"
+                "\n".join(['\t'.join([x.id, x.user, str(x.date), x.text]) for x in event.tweets]) + "\n"
             unclustered_events.write(outstr)
     ep.resolve_overlap_events()
     ep.enrich_events(xpos = args.x)
@@ -77,7 +77,7 @@ def output_events(d):
                 eventq.write("[[Choices]]\nGoed\nMatig\nSlecht\n\n")
             outstr = "\n" + "\t".join([str(event.date),str(event.score)]) + "\t" + \
                 ", ".join([x[0] for x in event.entities]) + "\n" + \
-                "\n".join('\t'.join([x.id, x.user, x.date, x.text] for x in event.tweets]) + "\n"
+                "\n".join(['\t'.join([x.id, x.user, str(x.date), x.text]) for x in event.tweets]) + "\n"
             eventinfo.write(outstr)
     eventinfo.close()
     if args.q:

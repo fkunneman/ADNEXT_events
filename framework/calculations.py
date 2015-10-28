@@ -175,11 +175,11 @@ def extract_date(tweet,date):
                 for t in nud["timeunit"]: 
                     num_match = t[1]
                     if "num" in nud:
-                        days = t[0] * [x[0] for x in nud["num"] if x[1] == num_match][0]
                         try:
+                            days = t[0] * [x[0] for x in nud["num"] if x[1] == num_match][0]
                             if days > 0:
                                 output.append(date + datetime.timedelta(days=days))
-                        except OverflowError:
+                        except:
                             continue
         if "month" in nud:
             for t in nud["month"]:
@@ -297,6 +297,8 @@ def extract_date(tweet,date):
                 u = s[0]
                 if u == "overmorgen":
                     output.append(date + datetime.timedelta(days=2))
+                elif u == 'morgen':
+                    output.append(date + datetime.timedelta(days=1))
         if len(nud.keys()) == 0:
             return False
         else:

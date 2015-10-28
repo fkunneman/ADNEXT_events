@@ -33,14 +33,18 @@ month_gold_standard = defaultdict(int)
 event_month = {}
 for event in gold_standard:
     parts = event.split('\t')
-    date = time_functions.return_datetime(parts[1])
-    event_month[parts[0].lower()] = date.month
-    month_gold_standard[date.month] += 1
+    if len(parts) < 2:
+        break
+    else:
+        date = time_functions.return_datetime(parts[1])
+        event_month[parts[0].lower()] = date.month
+        month_gold_standard[date.month] += 1
 
 month_extracted_events = defaultdict(int)
 for ee in extracted_events:
     parts = ee.split('\t')
     if len(parts) > 1:
+#        print('extract match', event_month[parts[2]], parts[2])
         month_extracted_events[event_month[parts[2]]] += 1
 
 month_tweet_matches = defaultdict(int)
@@ -49,43 +53,57 @@ for twma in tweet_matches:
     parts = twma.split('\t')
     num = int(parts[2])
     if eredivisie:
-        date = time_functions.return_datetime(parts[1])
+        date = time_functions.return_datetime(parts[1], setting = 'vs')
         if num >= 0:
             month_tweet_matches[date.month] += 1
             if num >= 5:
                 month_tweet_matches_threshold[date.month] += 1
     else:
         if num >= 0:
-            month = event_month[parts[0]]
+            month = event_month[parts[0].lower()]
+#            print('tweet match', month, parts[0])
             month_tweet_matches[month] += 1
             if num >= 5:
                 month_tweet_matches_threshold[month] += 1
 
-scores = ['period', '# gold standard events', '# tweets mentioning gold standard', '\% tweets mentioning gs', '# > 4 tweets mentioning gs', 
+scores = [['period', '# gold standard events', '# tweets mentioning gold standard', '\% tweets mentioning gs', '# > 4 tweets mentioning gs', 
     '\% tweets > 4 mentioning gs', '# extracted events', '\% extracted events of gold standard', '\% extracted events of tweets mentioning gs',
-    '\% extracted events of tweets > 4 mentioning gs']
+    '\% extracted events of tweets > 4 mentioning gs']]
 
-for month in [8, 9, 10, 11, 12]:
-    mgs = month_gold_standard[month]
-    matched = month_extracted_events[month] / mgs
-    matched_tweets = month_tweet_matches[month] / mgs
-    matched_tweets_threshold = month_tweet_matches_threshold / mgs
-    percentage_tweets = month_extracted_events[month] / month_tweet_matches[month]
-    percentage_tweets_threshold = month_extracted_events[month] / month_tweet_matches_threshold[month]
-    results = [month, mgs, month_tweet_matches[month], matched_tweets, month_tweet_matches_threshold[month], matched_tweets_threshold,
-    month_extracted_events[month], matched, percentage_tweets, percentage_tweets_threshold]  
-    scores.append([str(x) for x in results])
+gold_standard = 0
+extracted_events = 0
+tweet_matches = 0
+tweet_matches_threshold = 0
 
-matched = len(extracted_events) / num_gold_standard
-matched_tweets = len(tweet_matches) / num_gold_standard
-matched_tweets_threshold = [x for x in tweet_matches if int(x.split('\t')[2]) >= 5]
-matched_tweets_threshold_score = len(matched_tweets_threshold) / num_gold_standard
-percentage_tweets = len(extracted_events) / len(tweet_matches)
-percentage_tweets_threshold = len(extracted_events) / len(matched_tweets_threshold)
-results_total = ['total', num_gold_standard, len(tweet_matches), matched_tweets, len(matched_tweets_threshold),
-    matched_tweets_threshold_score, len(extracted_events), matched, matched_tweets, 
-    percentage_tweets, percentage_tweets_threshold]
-scores.append([str(x) for x in results_total])
+#for month in [8, 9, 10, 11, 12]:
+for month in [8, 9]:
+    try:
+#        mgs = month_gold_standard[month]
+        gold_standard += month_gold_standard[month]
+        extracted_events += month_extracted_events[month]
+        tweet_matches += month_tweet_matches[month]
+        tweet_matches_threshold += month_tweet_matches_threshold[month]
+    except:
+        results = [0,0,0,0,0,0,0,0,0,0]
+    #scores.append([str(x) for x in results])
+
+matched = extracted_events / gold_standard
+matched_tweets = tweet_matches / gold_standard
+matched_tweets_threshold = tweet_matches_threshold / gold_standard
+percentage_tweets = extracted_events / tweet_matches
+percentage_tweets_threshold = extracted_events / tweet_matches_threshold
+results = ['August and September', gold_standard, tweet_matches, matched_tweets, tweet_matches_threshold, matched_tweets_threshold, extracted_events, matched, percentage_tweets, percentage_tweets_threshold]  
+
+#matched = len(extracted_events) / num_gold_standard
+#matched_tweets = len(tweet_matches) / num_gold_standard
+#matched_tweets_threshold = [x for x in tweet_matches if int(x.split('\t')[2]) >= 5]
+#matched_tweets_threshold_score = len(matched_tweets_threshold) / num_gold_standard
+#percentage_tweets = len(extracted_events) / len(tweet_matches)
+#percentage_tweets_threshold = len(extracted_events) / len(matched_tweets_threshold)
+#results_total = ['total', num_gold_standard, len(tweet_matches), matched_tweets, len(matched_tweets_threshold),
+#    matched_tweets_threshold_score, len(extracted_events), matched, matched_tweets, 
+#    percentage_tweets, percentage_tweets_threshold]
+scores.append([str(x) for x in results])
 
 with open(out, 'w', encoding = 'utf-8') as outfile:
     outfile.write('\n'.join(['\t'.join(x) for x in scores]))
