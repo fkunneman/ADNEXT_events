@@ -69,7 +69,7 @@ class Event_pairs:
                     event.rank_tweets(rep=True)
                     event_unit = {"date":event.date,"keyterms":event.entities,"score":event.score,
                         "tweets":[{"id":x.id,"user":x.user,"date":x.date,"text":x.text,
-                        "date references":",".join([str(y) for y in x.daterefs]),
+                        "date_references":",".join([str(y) for y in x.daterefs]),
                         "entities":",".join(x.entities),
                         "postags":" | ".join(",".join(y) for y in x.postags)} for x in event.tweets]} 
                     eventdict.append(event_unit)
