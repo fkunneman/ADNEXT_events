@@ -10,9 +10,9 @@ def query_event_terms(event_terms, tweets, tmpdir = False):
         cc = coco.Coco(tmpdir)
         tweets_text = []
         for tweet in tweets:
-            columns = tweet.split('\t')
-            tweets_text.append(columns[-1])
-        cc.set_lines(tweets)
+            #columns = tweet.split('\t')
+            tweets_text.append(tweet.lower())
+        cc.set_lines(tweets_text)
         cc.simple_tokenize()
         cc.set_file()
         cc.model_ngramperline(event_terms)
@@ -34,7 +34,8 @@ with open(eventfile, 'r', encoding = 'utf-8') as ef:
         if date[5:7] == '08':
             day = int(date[8:])
             if day > 6 and day < 25:
-                events.append([date, tokens[2]])  
+                events.append([date, tokens[2].replace(', ', '|')])  
+print('|'.join([x[1] for x in events]).encode('utf-8'))
 
 for event in events:
     e = '|'.join(event)
@@ -44,12 +45,9 @@ for event in events:
         eventterm_event[term] = e
 
 eventterm_tweets = defaultdict(list)
-dates = []
 for tf in tfs:
     print(tf)
     d = tf[:8]
-    if dates[-1] != d:
-        dates.append(d)
     tweets = []
     with open(tf, encoding = 'utf-8') as tf:
         for tweet in tf.readlines()[1:]:
@@ -64,6 +62,6 @@ for tf in tfs:
 
 with open(outfile, 'w', encoding = 'utf-8') as out:
     for event in event_eventterms.keys():
-        outfile.write('***' + event + '\n')
+        out.write('***' + event + '\n')
         for eventterm in event_eventterms[event]:
-            outfile.write('---' + eventterm + '\n' + '----------'.join(eventterm_tweets[eventterm]) + '\n')
+            out.write('---' + eventterm + '\n' + '----------'.join(eventterm_tweets[eventterm]) + '\n')
