@@ -44,8 +44,11 @@ def query_event_terms_json(infile, qs, tmpdir):
 
     # query event terms from tweets
     matches = query_event_terms(qs, tweets_text, tmpdir)
+    matches_tweets = defaultdict(list)
+    for k in matches.keys():
+        matches_tweets[k] = [tweets[i] for i in matches[k]]
 
-    return matches
+    return matches_tweets
 
 def query_event_terms_txt(infile, qs, tmpdir):
     # open tweet file

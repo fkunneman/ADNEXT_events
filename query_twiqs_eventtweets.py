@@ -32,16 +32,13 @@ for line in querylines:
             if os.path.isfile(df):            
                 matches = query_tweets_json.query_event_terms_json(df, terms, tmpdir)
                 for m in matches.keys():
-                    print(df, m, matches[m])
                     tweetmatches[m].extend(matches[m])
-        quit()
         tweetout = outdir + tokens[0] + '_tweets.txt'
         eventstats = []
         with open(tweetout, 'w', encoding = 'utf-8') as tout:
             c = 0
             for eventterm in tweetmatches.keys():
                 tweets = tweetmatches[eventterm]
-                print(tweets)
                 tout.write('\n'.join(tweets) + '\n')
                 l = len(tweets)
                 eventstats.append([eventterm, str(l), str(c), str(c + l)])
