@@ -37,9 +37,10 @@ def query_event_terms_json(infile, qs, tmpdir):
                     continue
                 else:
                     tweets_text.append(text.lower())
+
         except:
             print(infile, 'error occurred at line \n', tweet, 'skipping file...')
-            quit()
+            continue
 
     # query event terms from tweets
     matches = query_event_terms(qs, tweets_text, tmpdir)
