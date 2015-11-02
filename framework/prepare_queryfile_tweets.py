@@ -9,13 +9,14 @@ def datetime2twiqsfiles(dt):
     month = '0' + month if len(month) == 1 else month
     day = str(dt.day)
     day = '0' + day if len(day) == 1 else day
-    date_template = year + month + day + '-'
-    files = []
-    for hour in range(24):
-        h = '0' + str(hour) if hour < 10 else str(hour)
-        files.append(date_template + h + '.out')
+    d = year + month + day
+    #date_template = year + month + day + '-'
+    #files = []
+    #for hour in range(24):
+    #    h = '0' + str(hour) if hour < 10 else str(hour)
+    #    files.append(date_template + h + '.out')
 
-    return files
+    return d
 
 def filedate2datetime(fd):
     year = int(fd[:4])
@@ -40,19 +41,20 @@ for event in events:
             term_date.append([term, date])
 
 for td in term_date:
-    term = term_date[0]
-    date = term_date[1]
+    term = td[0]
+    date = td[1]
     window_before = date - datetime.timedelta(days = 30)
-    window_before = begin if window_before < begin
+    window_before = begin if window_before < begin else window_before
     window_after = date + datetime.timedelta(days = 30)
-    window_after = end if window_after > end
+    window_after = end if window_after > end else window_after
     date_range = [window_before + datetime.timedelta(days = x) for x in range(0, (window_after - window_before).days)]
     for d in date_range:
         date_queryterms[d].append(term)
 
 with open(sys.argv[2], 'w', encoding = 'utf-8') as out:
     for date in sorted(date_queryterms.keys()):
-        files = datetime2twiqsfiles(date)
-        for f in files:
-            out.write(f + ', '.join(date_queryterms[date]) + '\n')
-
+        d = datetime2twiqsfiles(date)
+        #files = datetime2twiqsfiles(date)
+        #for f in files:
+        #    out.write(f + '\t' + ', '.join(date_queryterms[date]) + '\n')
+        out.write(d + '\t' + ', '.join(date_queryterms[date]) + '\n')
