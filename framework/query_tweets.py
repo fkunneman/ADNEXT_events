@@ -5,7 +5,7 @@ import timeit
 
 import coco
 
-def query_event_terms(event_terms, tweet, tmpdir = False):
+def query_event_terms(event_terms, tweets, tmpdir = False):
     if tmpdir:
         cc = coco.Coco(tmpdir)
         tweets_text = []
