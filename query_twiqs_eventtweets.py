@@ -1,6 +1,6 @@
 
 import sys
-from collections import counter
+import os
 from collections import defaultdict
 
 import query_tweets_json
@@ -14,7 +14,8 @@ def date2twiqsfiles(d):
     files = []
     for hour in range(24):
        h = '0' + str(hour) if hour < 10 else str(hour)
-       files.append(d + '-' + h + '.out')
+       files.append(outdir + d + '-' + h + '.out')
+    return files
 
 with open(queryfile, 'r', encoding = 'utf-8') as infile:
     querylines = infile.readlines()
@@ -23,22 +24,24 @@ for line in querylines:
     tokens = line.strip().split('\t')
     if tokens[0] == '20150423':
         datefiles = date2twiqsfiles(tokens[0])
+        print(tokens[0])
         terms = tokens[1].split(', ')
         tweetmatches = defaultdict(list)
         for df in datefiles:
             print(df)
-                try:
-                    matches = query_tweets_json.query_event_terms_json(df, terms, tmpdir)
-                    for m in matches.keys():
-                        tweetmatches[m].extend(matches[m])
-                except:
-                    print('not present')
+            if os.path.isfile(df):            
+                matches = query_tweets_json.query_event_terms_json(df, terms, tmpdir)
+                for m in matches.keys():
+                    print(df, m, matches[m])
+                    tweetmatches[m].extend(matches[m])
+        quit()
         tweetout = outdir + tokens[0] + '_tweets.txt'
         eventstats = []
         with open(tweetout, 'w', encoding = 'utf-8') as tout:
             c = 0
             for eventterm in tweetmatches.keys():
                 tweets = tweetmatches[eventterm]
+                print(tweets)
                 tout.write('\n'.join(tweets) + '\n')
                 l = len(tweets)
                 eventstats.append([eventterm, str(l), str(c), str(c + l)])

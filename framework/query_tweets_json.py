@@ -17,7 +17,7 @@ def query_event_terms(event_terms, tweets, tmpdir = False):
 
 def query_event_terms_json(infile, qs, tmpdir):
     # open tweet file
-    with open(sys.argv[1], encoding = 'utf-8') as infile:
+    with open(infile, encoding = 'utf-8') as infile:
         tweets = infile.readlines()
         # check if last tweet is incomplete, if so: throw away
         erikt = re.compile('}$')
@@ -26,7 +26,7 @@ def query_event_terms_json(infile, qs, tmpdir):
 
     # extract text of tweets from json file
     tweets_text = []
-    for tweet in tweets_text:
+    for tweet in tweets:
         if not re.match(r'^{', tweet):
             tweet = '{' + '{'.join(tweet.split('{')[1:])
         try:
