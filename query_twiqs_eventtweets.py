@@ -37,6 +37,9 @@ for line in querylines:
         eventstats = []
         with open(tweetout, 'w', encoding = 'utf-8') as tout:
             c = 0
+            non_terms = list(set(terms) - set(tweetmatches.keys()))
+            for term in non_terms:
+                eventstats.append([term, '0', '0', '0'])
             for eventterm in tweetmatches.keys():
                 tweets = tweetmatches[eventterm]
                 tout.write('\n'.join(tweets) + '\n')

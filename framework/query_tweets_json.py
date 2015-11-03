@@ -2,6 +2,7 @@
 import sys
 import re
 import json
+from collections import defaultdict
 
 import coco
 
@@ -26,6 +27,7 @@ def query_event_terms_json(infile, qs, tmpdir):
 
     # extract text of tweets from json file
     tweets_text = []
+    json_text = []
     for tweet in tweets:
         if not re.match(r'^{', tweet):
             tweet = '{' + '{'.join(tweet.split('{')[1:])
@@ -37,7 +39,7 @@ def query_event_terms_json(infile, qs, tmpdir):
                     continue
                 else:
                     tweets_text.append(text.lower())
-
+                    json_text.append(tweet)
         except:
             print(infile, 'error occurred at line \n', tweet, 'skipping file...')
             continue
@@ -46,7 +48,7 @@ def query_event_terms_json(infile, qs, tmpdir):
     matches = query_event_terms(qs, tweets_text, tmpdir)
     matches_tweets = defaultdict(list)
     for k in matches.keys():
-        matches_tweets[k] = [tweets[i] for i in matches[k]]
+        matches_tweets[k] = [json_text[i].strip() for i in matches[k]]
 
     return matches_tweets
 
