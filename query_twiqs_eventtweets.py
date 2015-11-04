@@ -33,7 +33,7 @@ for line in querylines:
     tweetmatches = defaultdict(list)
     #path = False
     for df in datefiles:
-        dfuz = df[:-3]
+        dfuz = df[:-3].replace('/', '_')
         os.system('hadoop fs -cat ' + df + ' | gunzip -c > ' + dfuz)
         #path = True
         matches = query_tweets_json.query_event_terms_json(dfuz, terms, tmpdir)
