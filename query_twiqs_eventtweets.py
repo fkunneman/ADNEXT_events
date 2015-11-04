@@ -9,8 +9,7 @@ import linewriter
 
 queryfile = sys.argv[1]
 outdir = sys.argv[2]
-filedir = sys.argv[3]
-tmpdir = sys.argv[4]
+tmpdir = sys.argv[3]
 
 def date2twiqsfiles(d): 
     files = []
