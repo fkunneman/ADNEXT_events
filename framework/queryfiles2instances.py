@@ -4,7 +4,7 @@ import datetime
 
 events = sys.argv[1]
 periodicities = sys.argv[2]
-stats_tweets = sys.argv[3:] # first half stats, second half tweets
+stats = sys.argv[3:] # first half stats, second half tweets
 
 event_date = {}
 event_terms = defaultdict(list)
@@ -20,13 +20,13 @@ with open(events, 'r', encoding = 'utf-8') as events_open:
         event_date[event] = date
         event_terms[event].append(term)
 
-half = len(stats_tweets) / 2
-statfiles = stats_tweets[:half]
-tweetfiles = stats_tweets[half:]
+# half = len(stats_tweets) / 2
+# statfiles = stats_tweets[:half]
+# tweetfiles = stats_tweets[half:]
 
-for i, statfile in enumerate(statfiles):
-    with open(tweetfiles[i], 'r', encoding = 'utf-8') as tweet_in:
-        tweets = tweet_in.readlines()
+for statfile in enumerate(stats):
+    # with open(tweetfiles[i], 'r', encoding = 'utf-8') as tweet_in:
+    #     tweets = tweet_in.readlines()
     with open(statfile, 'r', encoding = 'utf-8') as stat_in:
         for line in stat_in.readlines():
             tokens = line.strip().split('\t')
