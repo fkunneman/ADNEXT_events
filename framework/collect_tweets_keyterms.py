@@ -1,5 +1,7 @@
 
 import sys
+from collections import defaultdict
+
 import query_defs
 
 keyterms = sys.argv[1]
@@ -10,14 +12,16 @@ events = []
 event_terms = []
 with open(keyterms, 'r', encoding = 'utf-8') as kts:
     for line in kts.read().split('\n'):
-        tokens = line.split('\t')
-        keyterms = tokens[1].split(',')
-        date_begin = tokens[2]
-        date_end = tokens[3]
-        events.append([keyterms, date_begin, date_end])
-        terms.extend(keyterms)
+        if line != '':
+            tokens = line.split('\t')
+            keyterms = tokens[1].split(',')
+            date_begin = tokens[2]
+            date_end = tokens[3]
+            events.append([keyterms, date_begin, date_end])
+            event_terms.extend(keyterms)
+event_terms_set = set(event_terms)
 
-half = len(stats_tweets) / 2
+half = int(len(stats_tweets) / 2)
 stats = stats_tweets[:half]
 tweets = stats_tweets[half:]
 date_statfile = {}

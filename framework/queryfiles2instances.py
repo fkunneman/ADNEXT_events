@@ -1,10 +1,12 @@
 
 import sys
 import datetime
+from collections import defaultdict
 
 events = sys.argv[1]
-periodicities = sys.argv[2]
-stats = sys.argv[3:] # first half stats, second half tweets
+logfile = sys.argv[2]
+outfile = sys.argv[3]
+stats = sys.argv[4:] # first half stats, second half tweets
 
 event_date = {}
 event_terms = defaultdict(list)
@@ -24,7 +26,8 @@ with open(events, 'r', encoding = 'utf-8') as events_open:
 # statfiles = stats_tweets[:half]
 # tweetfiles = stats_tweets[half:]
 
-for statfile in enumerate(stats):
+print('Loading statfiles')
+for statfile in stats:
     # with open(tweetfiles[i], 'r', encoding = 'utf-8') as tweet_in:
     #     tweets = tweet_in.readlines()
     with open(statfile, 'r', encoding = 'utf-8') as stat_in:
@@ -34,13 +37,17 @@ for statfile in enumerate(stats):
             count = tokens[1]
             begin = tokens[2]
             end = tokens[3]
-            statdate = datetime.date(int(statfile[:4]), int(statfile[4:6]), int(statfile[6:8]))
+            statfilename = statfile.split('/')[-1]
+            statdate = datetime.date(int(statfilename[:4]), int(statfilename[4:6]), int(statfilename[6:8]))
             # add event-date frequency
             term_date_freq[event_term][statdate] = int(count)
             # add event-date tweets
             #term_tweets = [x.strip() for x in tweets[begin:end]]
             term_date_tweets[event_term][statdate] = [begin, end]
 
+logo = open(logfile, 'w', encoding = 'utf-8')
+
+print('Collecting timepatterns')
 lines = []
 for event in event_terms.keys():
     terms = event_terms[event]
@@ -49,7 +56,7 @@ for event in event_terms.keys():
     range_end = date + datetime.timedelta(days = 30)
     range_begin = date - datetime.timedelta(days = 30)
     for term in terms:
-        line = [event, term]
+        line = [[event], [term]]
         cursor_date = range_begin
         while cursor_date <= range_end:
             try:
@@ -57,9 +64,16 @@ for event in event_terms.keys():
                 entry = [str(cursor_date), str(stats)]
                 entry.extend(term_date_tweets[term][cursor_date])
                 line.append(entry)
+                cursor_date = cursor_date + datetime.timedelta(days = 1)
             except KeyError:
-                print('No input for', term, cursor_date)
-        print(line)
+                logo.write('No input for ' + term + ' ' + str(cursor_date) + '\n')
+                break
         lines.append(line)
 
-print(len(lines))
+logo.close()
+
+print(len(lines), 'lines')
+with open(outfile, 'w', encoding = 'utf-8') as f_out:
+    for line in lines:
+        f_out.write('\t'.join([','.join(x) for x in line]) + '\n')
+
