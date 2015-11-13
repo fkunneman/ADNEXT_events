@@ -36,6 +36,7 @@ for tweet in tweets:
 term_date_tweets = defaultdict(lambda : {})
 dates = sorted([int(x.split('/')[-1][:8]) for x in stats])
 for date in dates:
+    print(date)
     stat = date_statfile[date]
     with open(stat, 'r', encoding = 'utf-8') as stat_open:
         statlines = stat_open.readlines()
