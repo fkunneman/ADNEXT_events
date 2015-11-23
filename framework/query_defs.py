@@ -18,7 +18,7 @@ def extract_andpatterns(tweetdict, combis):
         for tweet in tweetdict[event_term]:
             tid = tweet.split('\t')[0]
             id_tweet[tid] = tweet
-            event_term_ids.append(tid)
+            event_term_ids[event_term].append(tid)
     combi_tweets = {}
     for combi in combis: # combine
         combi_sets = []
@@ -26,5 +26,6 @@ def extract_andpatterns(tweetdict, combis):
             combi_sets.append(set(event_term_ids[event_term]))
         overlap = list(set.intersection(*combi_sets))
         tweets = [id_tweet[x] for x in overlap]
-        combi_tweets['_'.join(combi)] = tweets
+        if len(tweets) > 0:
+            combi_tweets['_'.join(combi)] = tweets
     return combi_tweets
