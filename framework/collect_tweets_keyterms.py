@@ -35,12 +35,17 @@ for i, event in enumerate(events):
     date_end = event[3]
     date = event[4]
     term_sequence = defaultdict(list)
-    outtweets = outdir + str(event[0]) + '.txt'
+    outtweets = outdir + 'tweets_' + str(event[0]) + '.txt'
+    firstseen = False
+    end_date = date_cursor
     while date_cursor <= date_end:
         month = '0' + str(date_cursor.month) if len(str(date_cursor.month)) == 1 else str(date_cursor.month) 
         day = '0' + str(date_cursor.day) if len(str(date_cursor.day)) == 1 else str(date_cursor.day) 
         statfile = str(date_cursor.year) + month + day + '_eventstats.txt'
         if statfile in files:
+            if not firstseen:
+                firstseen = date_cursor
+            end_date = date_cursor
             statfile = datadir + statfile
             with open(statfile, 'r', encoding = 'utf-8') as stat_in:
                 stats = [line.split('\t') for line in stat_in.read().split('\n')]
@@ -68,8 +73,8 @@ for i, event in enumerate(events):
         else:
             print('no existing file', statfile)
         date_cursor += datetime.timedelta(days = 1)
-    outstats = outdir + str(event[0]) + '.txt'
+    outstats = outdir + 'sequence_' + str(event[0]) + '.txt'
     with open(outstats, 'w', encoding = 'utf-8') as stats_out:
-        stats_out.write(', '.join(event_terms) + '\t' + str(date) + '\n')
+        stats_out.write(', '.join(event_terms) + '\t' + str(date.date()) + '\t' + str(firstseen.date()) + '-' + str(end_date.date()) + '\n')
         for k in term_sequence.keys():
             stats_out.write(k + '\t' + ' '.join([str(x) for x in term_sequence[k]]) + '\n')
