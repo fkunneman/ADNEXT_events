@@ -956,6 +956,9 @@ def cluster_documents(pairsims,indices,thresh):
 
 def score_burstiness_sequence(sequence, position):
     average = numpy.mean(sequence)
-    burstiness = sequence[position] / average
+    if sequence[position] == 0 or average == 0.0:
+        burstiness = 0
+    else:
+        burstiness = sequence[position] / average
     count = sum(sequence)
     return [burstiness, sequence[position], count]

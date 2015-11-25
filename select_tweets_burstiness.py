@@ -17,6 +17,7 @@ eventfiles = [x for x in os.listdir(datadir) if x[:8] == 'sequence']
 statfiles = os.listdir(tweetdir)
 
 for eventfile in eventfiles:
+    print(eventfile)
     term_burstiness = []
     event_tweets = []
     event_id = eventfile.split('_')[1][:-4]
@@ -29,6 +30,7 @@ for eventfile in eventfiles:
     date_begin = time_functions.return_datetime(tokens[2][:10], setting = 'vs')
     date_end = time_functions.return_datetime(tokens[2][11:], setting = 'vs')
     position = (event_date - date_begin).days
+    print('calculating burstiness')
     for termsequence in lines[1:]:
         tokens = termsequence.split('\t')
         event_term = tokens[0]
@@ -38,16 +40,16 @@ for eventfile in eventfiles:
     ranked_burstiness = sorted(term_burstiness, key = lambda k : k[1], reverse = True)
     selected_terms = []
     for event_term in ranked_burstiness:
-        if event_term[1] >= 5 and event_term[2] >= 10:
+        if event_term[1] >= 10 and event_term[2] >= 20:
             selected_terms.append(event_term[0])
         else:
             break
     if len(selected_terms) > 0:
+        print('collecting tweets')
         with open(selected_events_file, 'a', encoding = 'utf-8') as selected_out:
             selected_out.write(event_id + '\n')
         # collect_tweets
-        outtweets = eventdir + 'tweets_' + event + '.txt'
-        term_tweets = defaultdict(list)
+        outtweets = eventdir + 'tweets_' + event_id + '.txt'
         cursor_date = date_begin
         while cursor_date <= date_end:
             month = '0' + str(cursor_date.month) if len(str(cursor_date.month)) == 1 else str(cursor_date.month) 
@@ -61,7 +63,7 @@ for eventfile in eventfiles:
                 with open(tweetsfile, 'r', encoding = 'utf-8') as tweets_in:
                     tweets = tweets_in.read().split('\n')
                 with open(outtweets, 'a', encoding = 'utf-8') as tweets_out:
-                    printed_ids = []
+                    printed_ids = set()
                     for event_term in selected_terms:
                         try:
                             term_index = terms.index(event_term)
@@ -72,10 +74,10 @@ for eventfile in eventfiles:
                                 if tid in printed_ids:
                                     continue
                                 else:
-                                    printed_ids.append(tid)
+                                    printed_ids.add(tid)
                                     tweets_out.write(tweet + '\n')
                         except ValueError:
-                            print(event_term.encode('utf-8'), 'not in list for event', i,'on date',str(date_cursor.date())) 
+                            print(event_term.encode('utf-8'), 'not in list for event', event_id,'on date',str(cursor_date.date())) 
                             continue
             else:
                 print('no existing file', statfile)
