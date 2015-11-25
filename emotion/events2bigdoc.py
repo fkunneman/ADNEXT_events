@@ -15,5 +15,5 @@ for eventfile in eventfiles:
     label = eventfile.split('_')[1][:-4]
     reader = docreader.Docreader()
     lines = reader.parse_csv(eventdir + eventfile)
-    print(lines[:3])
+    tagged = '\n'
             
