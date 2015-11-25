@@ -28,9 +28,9 @@ with open(keyterms, 'r', encoding = 'utf-8') as kts:
 files = os.listdir(datadir)
 num_events = len(events)
 for i, event in enumerate(events):
-    print(i, 'of', num_events, ':', event[0])
     event_terms = event[1]
-    combine = True if len(event_terms) > 1 else False
+    print(i, 'of', num_events, ':', ','.join(event_terms).encode('utf-8'))
+ #   combine = True if len(event_terms) > 1 else False
     date_cursor = event[2]
     date_end = event[3]
     date = event[4]
@@ -50,31 +50,39 @@ for i, event in enumerate(events):
             with open(statfile, 'r', encoding = 'utf-8') as stat_in:
                 stats = [line.split('\t') for line in stat_in.read().split('\n')]
                 terms = [line[0] for line in stats]
-            tweetsfile = datadir + str(date_cursor.year) + month + day + '_tweets_cleaned.txt'
-            with open(tweetsfile, 'r', encoding = 'utf-8') as tweets_in:
-                tweets = tweets_in.read().split('\n')
-            with open(outtweets, 'a', encoding = 'utf-8') as tweets_out:
-                term_tweets = defaultdict(list)
-                for event_term in event_terms:
+#            tweetsfile = datadir + str(date_cursor.year) + month + day + '_tweets_cleaned_good.txt'
+#            if combine:
+#                with open(tweetsfile, 'r', encoding = 'utf-8') as tweets_in:
+#                    tweets = tweets_in.read().split('\n')
+            #with open(outtweets, 'a', encoding = 'utf-8') as tweets_out:
+  #          term_tweets = defaultdict(list)
+            for event_term in event_terms:
+                try:
                     term_index = terms.index(event_term)
                     term_stats = stats[term_index]
                     term_sequence[event_term].append(int(term_stats[1]))
-                    tweet_segment = tweets[int(term_stats[2]) : int(term_stats[3])]
-                    for tweet in tweet_segment:
-                        tweets_out.write(event_term + '-----' + tweet + '\n')
-                    term_tweets[event_term].extend(tweet_segment)
-                if combine: # write combis to file
-                    combis = query_defs.return_combis(event_terms)
-                    combi_tweets = query_defs.extract_and_patterns(term_tweets, combis)
-                    for combi in combi_tweets.keys():
-                        term_sequence[combi].append(len(combi_tweets[combi]))
-                        for tweet in combi_tweets[combi]:
-                            tweets_out.write(combi + '-----' + tweet + '\n')
+    #                if combine:
+     #                   tweet_segment = tweets[int(term_stats[2]):int(term_stats[3])]
+#                        for tweet in tweet_segment:
+#                            tweets_out.write(event_term + '-----' + tweet + '\n')
+      #                  term_tweets[event_term].extend(tweet_segment)
+                except ValueError:
+                    #print(event_term.encode('utf-8'), 'not in list for event', i,'on date',str(date_cursor.date())) 
+                    term_sequence[event_term].append(0)
+          #  if combine: # write combis to file
+            #    combis = query_defs.return_combis(event_terms)
+           #     combi_tweets = query_defs.extract_and_patterns(term_tweets, combis)
+             #   for combi in combi_tweets.keys():
+              #      term_sequence[combi].append(len(combi_tweets[combi]))
+                    #for tweet in combi_tweets[combi]:
+                    #    tweets_out.write(combi + '-----' + tweet + '\n')
         else:
             print('no existing file', statfile)
         date_cursor += datetime.timedelta(days = 1)
-    outstats = outdir + 'sequence_' + str(event[0]) + '.txt'
-    with open(outstats, 'w', encoding = 'utf-8') as stats_out:
-        stats_out.write(', '.join(event_terms) + '\t' + str(date.date()) + '\t' + str(firstseen.date()) + '-' + str(end_date.date()) + '\n')
-        for k in term_sequence.keys():
-            stats_out.write(k + '\t' + ' '.join([str(x) for x in term_sequence[k]]) + '\n')
+    if firstseen:
+        outstats = outdir + 'sequence_' + str(event[0]) + '.txt'
+        with open(outstats, 'w', encoding = 'utf-8') as stats_out:
+            stats_out.write(', '.join(event_terms) + '\t' + str(date.date()) + '\t' + str(firstseen.date()) + '-' + str(end_date.date()) + '\n')
+            for k in term_sequence.keys():
+                stats_out.write(k + '\t' + ' '.join([str(x) for x in term_sequence[k]]) + '\n')
+
