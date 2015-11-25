@@ -12,6 +12,7 @@ fields = ['label', 'doc_id', 'author_id', 'date', 'time', 'authorname', 'text', 
 columndict = {'doc_id' : 0, 'author_id' : 1, 'authorname' : 2, 'date' : 3, 'time' : 4, 'text' : 5}
 
 for eventfile in eventfiles:
+    print(eventfile)
     reader = docreader.Docreader()
     reader.parse_doc(eventfile, '\t', False, False, False)
     new_lines, other_lines = reader.set_lines(fields, columndict)
