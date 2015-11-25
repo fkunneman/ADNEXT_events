@@ -962,3 +962,6 @@ def score_burstiness_sequence(sequence, position):
         burstiness = sequence[position] / average
     count = sum(sequence)
     return [burstiness, sequence[position], count]
+
+def return_idf(doc_count, total_docs):
+    return math.log((total_docs / doc_count), 10)
