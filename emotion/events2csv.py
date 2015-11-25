@@ -9,7 +9,7 @@ eventdir = sys.argv[1]
 eventfiles = sys.argv[2:]
 
 fields = ['label', 'doc_id', 'author_id', 'date', 'time', 'authorname', 'text', 'tagged']
-columndict = {'doc_id' : 0, 'author_id' : 1, 'authorname' : 2, 'date' : 3, 'time' : 4, 'text' : 5}
+columndict = {0 : 'doc_id', 1 : 'author_id', 2 : 'authorname', 3 : 'date', 4 : 'time', 5 : 'text'}
 
 for eventfile in eventfiles:
     reader = docreader.Docreader()
