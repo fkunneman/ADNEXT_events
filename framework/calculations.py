@@ -958,4 +958,4 @@ def score_burstiness_sequence(sequence, position):
     average = numpy.mean([x for x in sequence if x > 0])
     burstiness = sequence[position] / average
     count = sum(sequence)
-    return (burstiness, count)
+    return (burstiness, sequence[position], count)
