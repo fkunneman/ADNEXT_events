@@ -12,11 +12,11 @@ dh.set(eventdoc)
 dh.filter_punctuation()
 dh.to_lower()
 
-f = {'token_ngrams' : {'n_list' : [1, 2, 3]}}
+f = {'token_ngrams' : {'n_list' : [1, 2, 3, 4, 5]}}
 dir_eventdoc = '/'.join(eventdoc.split('/')[:-1])
 featurizer = featurizer.Featurizer(dh['text'], dh['tags'], dir_eventdoc, f)
 featurizer.fit_transform()
 instances, vocabulary = featurizer.return_instances(['token_ngrams'])
 
-print(' | '.join(instances[1]).encode('utf-8')
+labels = dh.dataset['label']
 
