@@ -16,7 +16,7 @@ header = ['label', 'tweet_id', 'author_id', 'date', 'time', 'authorname', 'text'
 bigdocs = [header]
 for taggedfile in taggedfiles:
     label = taggedfile.split('_')[1][:-4]
-    with open(statdir + 'sequence_' + label + '.txt') as stat_in:
+    with open(statdir + 'sequence_' + label + '.txt', 'r', encoding = 'utf-8') as stat_in:
         lines = stat_in.read().split('\n')
         event_info = lines[0]
         date = event_info.split('\t')[1]

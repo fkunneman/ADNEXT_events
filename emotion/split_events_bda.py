@@ -11,7 +11,7 @@ beforedir = sys.argv[3] # directory to write before tweets to
 duringdir = sys.argv[4] # directory to write during tweets to
 afterdir = sys.argv[5] # directory to write after tweets to
 
-tweets_files = [tf for tf in os.listdir(tweetsdir) if tf[-4:] == '.txt']
+tweets_files = [tf for tf in os.listdir(tweetsdir) if tf[:6] == 'tweets' and tf[-4:] == '.txt']
 sequence_files = [sf for sf in os.listdir(sequencedir) if sf[:9] == 'sequence_']
 before_files = os.listdir(beforedir)
 during_files = os.listdir(duringdir)
