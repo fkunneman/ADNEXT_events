@@ -22,7 +22,9 @@ cc.model_ngramperline(to_match)
 matches = cc.match(to_match)
 
 for key in matches.keys():
-    outfile = outdir + key + '.csv'
-    selected = [lines[i] for i in matches[key]]
-    lw = linewriter.Linewriter(selected)
-    lw.write_csv(outfile)
+    outfile = outdir + key + '.txt'
+    with open(outfile, 'w') as file_out:
+        file_out.write('\n'.join([str(i) for i in matches[key]]))
+    # selected = [lines[i] for i in matches[key]]
+    # lw = linewriter.Linewriter(selected)
+    # lw.write_csv(outfile)
