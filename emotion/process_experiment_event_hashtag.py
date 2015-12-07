@@ -215,9 +215,9 @@ with open('test.rnk') as rnk:
         classification = classification.replace("?","")
         classifications.append([targets[filename], classification, score])
 
-os.system("mv * " + experiment_dir)
+os.system("mv * " + event_train_dir)
 output = (devlines, [classifications, '-', '-']) 
-rp = reporter.Eval(output, [label_positive, label_negative], experiment_dir)
+rp = reporter.Eval(output, [label_positive, label_negative], event_train_dir)
 rp.report()
 
 #################################################
@@ -281,7 +281,7 @@ with open('test.rnk') as rnk:
         classification = classification.replace("?","")
         classifications.append([targets[filename], classification, score])
 
-os.system("mv * " + experiment_dir)
+os.system("mv * " + emotion_train_dir)
 output = (devlines, [classifications, '-', '-']) 
-rp = reporter.Eval(output, [label_positive, label_negative], experiment_dir)
+rp = reporter.Eval(output, [label_positive, label_negative], emotion_train_dir)
 rp.report()
