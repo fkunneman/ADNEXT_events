@@ -107,9 +107,9 @@ if not os.path.exists(emotion_train_dir):
 print('train events')
 
 # identify dev indices with hashtag
-#dr = docreader.Docreader()
-# devlines = dr.parse_csv(tweets_dev)
-# textlines_dev = [x[-1] for x in devlines]
+dr = docreader.Docreader()
+devlines = dr.parse_csv(tweets_dev)
+textlines_dev = [x[-1] for x in devlines]
 
 # cc = coco.Coco(tmpdir)
 # cc.set_lines(textlines_dev)
