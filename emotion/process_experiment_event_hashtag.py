@@ -175,7 +175,7 @@ train = []
 chunks = [range(instances.shape[0])]
 for i, chunk in enumerate(chunks):
     # make subdirectory
-    subpart = parts_train.split('/')[-1][-4] + '_' + label_positive + '/'
+    subpart = 'event_' + label_positive + '/'
     subdir = files_dir + subpart
     if not os.path.isdir(subdir):
         os.mkdir(subdir)
