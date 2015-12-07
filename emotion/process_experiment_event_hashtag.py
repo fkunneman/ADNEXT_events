@@ -104,33 +104,34 @@ emotion_train_dir = experiment_dir + 'emotion_train/'
 if not os.path.exists(emotion_train_dir):
     os.mkdir(emotion_train_dir)
 
-print('Preparing test')
-# identify dev indices with hashtag
-dr = docreader.Docreader()
-devlines = dr.parse_csv(tweets_dev)
-textlines_dev = [x[-1] for x in devlines]
+print('train events')
 
-cc = coco.Coco(tmpdir)
-cc.set_lines(textlines_dev)
-cc.set_file()
-cc.model_ngramperline([hashtag])
-matches = cc.match([hashtag])[hashtag]
+# identify dev indices with hashtag
+#dr = docreader.Docreader()
+# devlines = dr.parse_csv(tweets_dev)
+# textlines_dev = [x[-1] for x in devlines]
+
+# cc = coco.Coco(tmpdir)
+# cc.set_lines(textlines_dev)
+# cc.set_file()
+# cc.model_ngramperline([hashtag])
+# matches = cc.match([hashtag])[hashtag]
 
 #matches = random.sample(range(len(textlines_dev)), 1000)
 
-ht_tweets_dev = [devlines[i] for i in matches]
-with open(parts_dev) as dev_open:
-    parts = dev_open.readlines()
+# ht_tweets_dev = [devlines[i] for i in matches]
+# with open(parts_dev) as dev_open:
+#     parts = dev_open.readlines()
 
-test = []
-for i, instance in enumerate(parts):
-    tokens = instance.split()
-    if i in matches:
-        test.append(tokens[0] + ' ' + label_positive)
-    else:
-        test.append(tokens[0] + ' ' + label_negative)
-test_tuples = [instance.split() for instance in test]
-targets = dict((filename, target) for filename, target in test_tuples)
+# test = []
+# for i, instance in enumerate(parts):
+#     tokens = instance.split()
+#     if i in matches:
+#         test.append(tokens[0] + ' ' + label_positive)
+#     else:
+#         test.append(tokens[0] + ' ' + label_negative)
+# test_tuples = [instance.split() for instance in test]
+# targets = dict((filename, target) for filename, target in test_tuples)
 
 # identify train indices with hashtag
 dr = docreader.Docreader()
@@ -203,28 +204,30 @@ for i, instance in enumerate(parts):
 # classify lcs
 with open('train', 'w', encoding = 'utf-8') as train_out:
     train_out.write('\n'.join(train))
-with open('test', 'w', encoding = 'utf-8') as test_out:
-    test_out.write('\n'.join(test))
+# with open('test', 'w', encoding = 'utf-8') as test_out:
+#     test_out.write('\n'.join(test))
 write_config()
 
 os.system("lcs --verbose")
 
 # evaluate
-classifications = []
-with open('test.rnk') as rnk:
-    for line in rnk.readlines():
-        tokens = line.strip().split()
-        filename = tokens[0].strip()
-        classification, score = tokens[1].split()[0].split(":")
-        classification = classification.replace("?","")
-        classifications.append([targets[filename], classification, float(score)])
+# classifications = []
+# with open('test.rnk') as rnk:
+#     for line in rnk.readlines():
+#         tokens = line.strip().split()
+#         filename = tokens[0].strip()
+#         classification, score = tokens[1].split()[0].split(":")
+#         classification = classification.replace("?","")
+#         classifications.append([targets[filename], classification, float(score)])
 
 os.system("mv * " + event_train_dir)
-output = (textlines_dev, [classifications, False, False]) 
-rp = reporter.Eval(output, [label_positive, label_negative], event_train_dir)
-rp.report()
+#output = (textlines_dev, [classifications, False, False]) 
+#rp = reporter.Eval(output, [label_positive, label_negative], event_train_dir)
+#rp.report()
 
 #################################################
+
+print('train emotion')
 
 # select training tweets positive and negative
 dr = docreader.Docreader()
@@ -262,24 +265,24 @@ with open('train', 'w', encoding = 'utf-8') as train_out:
         tokens = x.strip().split()
         train_out.write('\n' + tokens[0] + ' ' + label_negative)
 
-with open('test', 'w', encoding = 'utf-8') as test_out:
-    test_out.write('\n'.join(test))
+# with open('test', 'w', encoding = 'utf-8') as test_out:
+#     test_out.write('\n'.join(test))
 write_config()
 
 # classify lcs
 os.system("lcs --verbose")
 
 # evaluate
-classifications = []
-with open('test.rnk') as rnk:
-    for line in rnk.readlines():
-        tokens = line.strip().split()
-        filename = tokens[0].strip()
-        classification, score = tokens[1].split()[0].split(":")
-        classification = classification.replace("?","")
-        classifications.append([targets[filename], classification, float(score)])
+# classifications = []
+# with open('test.rnk') as rnk:
+#     for line in rnk.readlines():
+#         tokens = line.strip().split()
+#         filename = tokens[0].strip()
+#         classification, score = tokens[1].split()[0].split(":")
+#         classification = classification.replace("?","")
+#         classifications.append([targets[filename], classification, float(score)])
 
 os.system("mv * " + emotion_train_dir)
-output = (textlines_dev, [classifications, False, False]) 
-rp = reporter.Eval(output, [label_positive, label_negative], emotion_train_dir)
-rp.report()
+# output = (textlines_dev, [classifications, False, False]) 
+# rp = reporter.Eval(output, [label_positive, label_negative], emotion_train_dir)
+# rp.report()
