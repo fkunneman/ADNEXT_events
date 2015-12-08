@@ -1,14 +1,9 @@
 
 import sys
 import os
-import random
-import re
 
 import coco
 import docreader
-import reporter
-import utils
-import featurizer
 
 hashtag = sys.argv[1]
 label_positive = sys.argv[2]
