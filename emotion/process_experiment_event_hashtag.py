@@ -23,6 +23,8 @@ parts_train = sys.argv[10]
 parts_dev = sys.argv[11]
 files_dir = sys.argv[12]
 experiment_dir = sys.argv[13]
+event_train = int(sys.argv[14]) # choose to prepare event_train
+emotion_train = int(sys.argv[15]) # choose to prepare emotion_train
 
 def write_config():
     fileschunks = files_dir.split("/")
@@ -104,128 +106,131 @@ emotion_train_dir = experiment_dir + 'emotion_train/'
 if not os.path.exists(emotion_train_dir):
     os.mkdir(emotion_train_dir)
 
-print('train events')
-
 # identify dev indices with hashtag
 dr = docreader.Docreader()
 devlines = dr.parse_csv(tweets_dev)
 textlines_dev = [x[-1] for x in devlines]
 
-# identify train indices with hashtag
-dr = docreader.Docreader()
-trainlines = dr.parse_csv(tweets_train)
-textlines = [x[-1] for x in trainlines]
+if event_train:
+    print('train events')
 
-cc = coco.Coco(tmpdir)
-cc.set_lines(textlines)
-cc.set_file()
-cc.model_ngramperline([hashtag])
-matches = cc.match([hashtag])[hashtag]
+    # identify train indices with hashtag
+    dr = docreader.Docreader()
+    trainlines = dr.parse_csv(tweets_train)
+    textlines = [x[-1] for x in trainlines]
 
-# make new files with matches
-ht_tweets_train = [textlines[i] for i in matches]
-ht_tweets_train_tagged = utils.tokenized_2_tagged(ht_tweets_train)
-find_username = re.compile("^@\w+")
-find_url = re.compile(r"^(http://|www|[^\.]+)\.([^\.]+\.)*[^\.]{2,}")
-new_tweets_tagged = []
-for tweet in ht_tweets_train_tagged:
-    new_tweet = []
-    for token in tweet:
-        if find_username.match(token[0]):
-            token[0] = '_USER_'
-        elif find_url.match(token[0]):
-            token[0] = '_URL_'
-        else:
-            token[0] = token[0].lower()
-        new_tweet.append(token)
-    new_tweets_tagged.append(new_tweet)
+    cc = coco.Coco(tmpdir)
+    cc.set_lines(textlines)
+    cc.set_file()
+    cc.model_ngramperline([hashtag])
+    matches = cc.match([hashtag])[hashtag]
 
-print('Extracting features')
-partsdirectory = '/'.join(parts_hashtag.split('/')[:-1]) + '/'
-featuredict = {'token_ngrams' : {'n_list': [1, 2, 3], 'blackfeats' : ['_USER_', '_URL_'] + [hashtag]}}
-ft = featurizer.Featurizer(ht_tweets_train, new_tweets_tagged, partsdirectory, featuredict)
-ft.fit_transform()
-instances, vocabulary = ft.return_instances(['token_ngrams'])
+    # make new files with matches
+    ht_tweets_train = [textlines[i] for i in matches]
+    ht_tweets_train_tagged = utils.tokenized_2_tagged(ht_tweets_train)
+    find_username = re.compile("^@\w+")
+    find_url = re.compile(r"^(http://|www|[^\.]+)\.([^\.]+\.)*[^\.]{2,}")
+    new_tweets_tagged = []
+    for tweet in ht_tweets_train_tagged:
+        new_tweet = []
+        for token in tweet:
+            if find_username.match(token[0]):
+                token[0] = '_USER_'
+            elif find_url.match(token[0]):
+                token[0] = '_URL_'
+            else:
+                token[0] = token[0].lower()
+            new_tweet.append(token)
+        new_tweets_tagged.append(new_tweet)
 
-train = []
-# make chunks of 25000 from the data
-chunks = [range(instances.shape[0])]
-for i, chunk in enumerate(chunks):
-    # make subdirectory
-    subpart = 'event_' + label_positive + '/'
-    subdir = files_dir + subpart
-    if not os.path.isdir(subdir):
-        os.mkdir(subdir)
-    for j, index in enumerate(chunk):
-        zeros = 5 - len(str(j))
-        filename = subpart + ('0' * zeros) + str(j) + '.txt'
-        features = [vocabulary[x] for x in instances[index].indices]
-        with open(files_dir + filename, 'w', encoding = 'utf-8') as outfile: 
-            outfile.write('\n'.join(features))
-        train.append(filename + ' ' + label_positive)
+    print('Extracting features')
+    partsdirectory = '/'.join(parts_hashtag.split('/')[:-1]) + '/'
+    featuredict = {'token_ngrams' : {'n_list': [1, 2, 3], 'blackfeats' : ['_USER_', '_URL_'] + [hashtag]}}
+    ft = featurizer.Featurizer(ht_tweets_train, new_tweets_tagged, partsdirectory, featuredict)
+    ft.fit_transform()
+    instances, vocabulary = ft.return_instances(['token_ngrams'])
 
-with open(parts_train) as train_open:
-    parts = train_open.readlines()
+    train = []
+    # make chunks of 25000 from the data
+    chunks = [range(instances.shape[0])]
+    for i, chunk in enumerate(chunks):
+        # make subdirectory
+        subpart = 'event_' + label_positive + '/'
+        subdir = files_dir + subpart
+        if not os.path.isdir(subdir):
+            os.mkdir(subdir)
+        for j, index in enumerate(chunk):
+            zeros = 5 - len(str(j))
+            filename = subpart + ('0' * zeros) + str(j) + '.txt'
+            features = [vocabulary[x].replace(' ', '_') for x in instances[index].indices]
+            with open(files_dir + filename, 'w', encoding = 'utf-8') as outfile: 
+                outfile.write('\n'.join(features))
+            train.append(filename + ' ' + label_positive)
 
-parts_indices = range(len(parts))
-nht_train = list(set(parts_indices) - set(matches))
-num_ht_train = len(matches)
-random_train = random.sample(nht_train, num_ht_train)
+    with open(parts_train) as train_open:
+        parts = train_open.readlines()
 
-for i, instance in enumerate(parts):
-    if i in random_train:
-        tokens = instance.split()
-        train.append(tokens[0] + ' ' + label_negative)
+    parts_indices = range(len(parts))
+    nht_train = list(set(parts_indices) - set(matches))
+    num_ht_train = len(matches)
+    random_train = random.sample(nht_train, num_ht_train)
+    random_train_set = set(random_train)
 
-# classify lcs
-with open('train', 'w', encoding = 'utf-8') as train_out:
-    train_out.write('\n'.join(train))
+    for i, instance in enumerate(parts):
+        if set([i]) & random_train_set:
+            tokens = instance.split()
+            train.append(tokens[0] + ' ' + label_negative)
 
-write_config()
-os.system("lcs --verbose")
-os.system("mv * " + event_train_dir)
+    # classify lcs
+    with open('train', 'w', encoding = 'utf-8') as train_out:
+        train_out.write('\n'.join(train))
+
+    write_config()
+    os.system("lcs --verbose")
+    os.system("mv * " + event_train_dir)
 
 #################################################
 
-print('train emotion')
+if emotion_train:
+    print('train emotion')
 
-# select training tweets positive and negative
-dr = docreader.Docreader()
-train_tweets_general = dr.parse_csv(tweets_hashtag)
-train_tweets_ids = [x[0] for x in train_tweets_general]
-ids_dev = set([x[0] for x in devlines])
-overlap = [] 
-for i, tweet in enumerate(train_tweets_ids):
-    if set([tweet]) & ids_dev:
-        overlap.append(i)
+    # select training tweets positive and negative
+    dr = docreader.Docreader()
+    train_tweets_general = dr.parse_csv(tweets_hashtag)
+    train_tweets_ids = [x[1] for x in train_tweets_general]
+    ids_dev = set([x[0] for x in devlines])
+    overlap = [] 
+    for i, tweet in enumerate(train_tweets_ids):
+        if set([tweet]) & ids_dev:
+            overlap.append(i)
 
-with open(parts_hashtag) as ph_open:
-    train_parts_general = ph_open.readlines()
-print('train size before:', len(train_parts_general))
-train_parts_general_clean = [x for i, x in enumerate(train_parts_general) if not i in overlap]
-print('train size after:', len(train_parts_general_clean))
+    with open(parts_hashtag) as ph_open:
+        train_parts_general = ph_open.readlines()
+    print('train size before:', len(train_parts_general))
+    train_parts_general_clean = [x for i, x in enumerate(train_parts_general) if not i in overlap]
+    print('train size after:', len(train_parts_general_clean))
 
-dr = docreader.Docreader()
-random_tweets = dr.parse_csv(tweets_random)
-random_tweets_ids = [x[0] for x in random_tweets]
-overlap = [] 
-for i, tweet in enumerate(random_tweets_ids):
-    if set([tweet]) & ids_dev:
-        overlap.append(i)   
-with open(parts_random) as pr_open:
-    random_parts = pr_open.readlines()
-print('random size before:', len(random_parts))
-random_parts_clean = [x for i, x in enumerate(random_parts) if not i in overlap]
-print('random size after:', len(random_parts_clean))
+    dr = docreader.Docreader()
+    random_tweets = dr.parse_csv(tweets_random)
+    random_tweets_ids = [x[0] for x in random_tweets]
+    overlap = [] 
+    for i, tweet in enumerate(random_tweets_ids):
+        if set([tweet]) & ids_dev:
+            overlap.append(i)   
+    with open(parts_random) as pr_open:
+        random_parts = pr_open.readlines()
+    print('random size before:', len(random_parts))
+    random_parts_clean = [x for i, x in enumerate(random_parts) if not i in overlap]
+    print('random size after:', len(random_parts_clean))
 
-# classify lcs
-random_sample = random.sample(random_parts_clean, len(train_parts_general_clean))
-with open('train', 'w', encoding = 'utf-8') as train_out:
-    train_out.write(''.join(train_parts_general_clean))
-    for x in random_sample:
-        tokens = x.strip().split()
-        train_out.write('\n' + tokens[0] + ' ' + label_negative)
+    # classify lcs
+    random_sample = random.sample(random_parts_clean, len(train_parts_general_clean))
+    with open('train', 'w', encoding = 'utf-8') as train_out:
+        train_out.write(''.join(train_parts_general_clean))
+        for x in random_sample:
+            tokens = x.strip().split()
+            train_out.write('\n' + tokens[0] + ' ' + label_negative)
 
-write_config()
-os.system("lcs --verbose")
-os.system("mv * " + emotion_train_dir)
+    write_config()
+    os.system("lcs --verbose")
+    os.system("mv * " + emotion_train_dir)

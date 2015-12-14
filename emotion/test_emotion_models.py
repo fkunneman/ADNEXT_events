@@ -14,9 +14,10 @@ testparts = sys.argv[1]
 hashtags = sys.argv[2:]
 
 with open(testparts) as tp_open:
-    testlines = testparts.readlines()
+    testlines = tp_open.readlines()
+print(len(testlines))
 
-for i in range(len(testlines), 1000):
+for i in range(0, len(testlines), 1000):
     try:
         chunk = testlines[i : i+1000]
     except:
@@ -26,4 +27,7 @@ for i in range(len(testlines), 1000):
     for hashtag in hashtags:
         os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/emotion_train/ ' +
             'test >> ' + hashtag + '/emotion_train/test.rnk')
+        os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/event_train/ ' +
+            'test >> ' + hashtag + '/event_train/test.rnk')
     print(i+1000, 'lines done.')
+    os.system('rm -r unseenidx/')
