@@ -47,5 +47,8 @@ for i, instance in enumerate(parts):
     else:
         test.append(tokens[0] + ' ' + label_negative)
 
-with open(experiment_dir + 'test', 'w', encoding = 'utf-8') as test_out:
+with open(experiment_dir + 'event_train/test', 'w', encoding = 'utf-8') as test_out:
+    test_out.write('\n'.join(test))
+
+with open(experiment_dir + 'emotion_train/test', 'w', encoding = 'utf-8') as test_out:
     test_out.write('\n'.join(test))
