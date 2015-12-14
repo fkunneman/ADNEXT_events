@@ -28,3 +28,16 @@ print('performing evaluation')
 output = (classifications, False, False)
 ev = reporter.Eval Reporter(output, [label, 'other'], experimentdir)
 ev.report()
+
+features_weight = []
+with open(experimentdir + 'data/' + label + '_6.mitp', 'r', encoding = 'utf-8') as features_in:
+    featurelines = features_in.readlines()[6:]
+    for line in featurelines:
+        tokens = line.split('\t')
+        feature = tokens[0]
+        weight = round(float(tokens[1]), 2)
+        features_weight.append([feature, weight])
+
+features_weight_sorted = sorted(features_weight, key = lambda k : k[1], reverse = True)
+with open(experimentdir + 'features_sorted.txt', 'w', encoding = 'utf-8') as features_out:
+    features_out.write('\n'.join(['\t'.join([str(x) for x in line]) for line in features_weight_sorted]))
