@@ -11,7 +11,7 @@ label = sys.argv[3]
 print('reading in docs')
 dr = docreader.Docreader()
 lines = dr.parse_csv(docsfile)
-docs = [x[-1] for x in devlines]
+docs = [x[-1] for x in lines]
 
 print('reading in targets')
 # parse test
@@ -33,7 +33,7 @@ with open(experimentdir + 'test.rnk', 'r', encoding = 'utf-8') as output_in:
 
 print('performing evaluation')
 output = (classifications, False, False)
-ev = reporter.Eval([docs, [output, [label, 'other'], experimentdir]])
+ev = reporter.Eval([docs, output], [label, 'other'], experimentdir)
 ev.report()
 
 features_weight = []
