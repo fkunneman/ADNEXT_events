@@ -7,7 +7,8 @@ import reporter
 experimentdir = sys.argv[1]
 docsfile = sys.argv[2]
 label = sys.argv[3]
-other_testlabel = int(sys.argv[4]) #bool
+parts = sys.argv[4]
+other_testlabel = int(sys.argv[5]) #bool
 
 print('reading in docs')
 dr = docreader.Docreader()
@@ -21,8 +22,14 @@ with open(experimentdir + 'test', 'r', encoding = 'utf-8') as test_in:
     test_tuples = [instance.strip().split() for instance in instances]
     targets = dict((filename, target) for filename, target in test_tuples)
 
+print('reading in parts')
+with open(parts, 'r', encoding = 'utf-8') as parts_in:
+    instances = parts_in.readlines()
+    indices = dict((instance.split()[0], i) for i, instance in enumerate(instances))
+
 print('reading in classifications')
 classifications = []
+selected_docs = []
 # parse output
 with open(experimentdir + 'test.rnk', 'r', encoding = 'utf-8') as output_in:
     for line in output_in.readlines():
@@ -33,10 +40,12 @@ with open(experimentdir + 'test.rnk', 'r', encoding = 'utf-8') as output_in:
         if other_testlabel and classification != 'other':
             classification = label
         classifications.append([targets[filename], classification, float(score)])
+        selected_docs.append(docs[indices[filename]])
 
+print('selected', len(selected_docs), 'docs')
 print('performing evaluation')
 output = (classifications, False, False)
-ev = reporter.Eval([docs, output], [label, 'other'], experimentdir)
+ev = reporter.Eval([selected_docs, output], [label, 'other'], experimentdir)
 ev.report()
 
 features_weight = []
