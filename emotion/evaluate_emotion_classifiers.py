@@ -7,6 +7,7 @@ import reporter
 experimentdir = sys.argv[1]
 docsfile = sys.argv[2]
 label = sys.argv[3]
+other_testlabel = int(sys.argv[4]) #bool
 
 print('reading in docs')
 dr = docreader.Docreader()
@@ -29,6 +30,8 @@ with open(experimentdir + 'test.rnk', 'r', encoding = 'utf-8') as output_in:
         filename = '/'.join(tokens[0].strip().split('/')[-2:])
         classification, score = tokens[1].split()[0].split(":")
         classification = classification.replace("?","")
+        if other_testlabel and classification != 'other':
+            classification = label
         classifications.append([targets[filename], classification, float(score)])
 
 print('performing evaluation')
