@@ -17,8 +17,8 @@ statfiles = os.listdir(tweetdir)
 writtenfiles = [x for x in os.listdir(eventdir) if x[-4:] == '.txt']
 
 all_written = [x[7:-4] for x in writtenfiles]
-non_written = sorted(list(set(all_eventfiles) - set(all_written)))
-print(non_written)
+non_written = sorted(list(set(all_events) - set(all_written)))
+print(len(all_events), len(all_written), len(non_written))
 quit()
 
 for eventfile in eventfiles:
