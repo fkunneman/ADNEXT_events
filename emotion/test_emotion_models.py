@@ -4,14 +4,14 @@ import os
 import random
 import re
 
-import coco
 import docreader
 import reporter
 import utils
-import featurizer
 
 testparts = sys.argv[1]
-hashtags = sys.argv[2:]
+event = int(sys.argv[2]) #bool
+emotion = int(sys.argv[3]) #bool
+hashtags = sys.argv[4:]
 
 with open(testparts) as tp_open:
     testlines = tp_open.readlines()
@@ -25,9 +25,11 @@ for i in range(0, len(testlines), 1000):
     with open('test', 'w') as testout:
         testout.write(''.join(chunk))
     for hashtag in hashtags:
-        os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/emotion_train/ ' +
+        if emotion:
+            os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/emotion_train/ ' +
             'test >> ' + hashtag + '/emotion_train/test.rnk')
-        os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/event_train/ ' +
+        if event:
+            os.system('/vol/customopt/machine-learning/lib/lcs3.8/production.jar ' + hashtag + '/event_train/ ' +
             'test >> ' + hashtag + '/event_train/test.rnk')
     print(i+1000, 'lines done.')
     os.system('rm -r unseenidx/')
