@@ -10,6 +10,9 @@ datadir = sys.argv[1]
 tweetdir = sys.argv[2]
 eventdir = sys.argv[3]
 
+def collect_tweets_statfiles(event_term, date):
+    pass
+
 all_eventfiles = [x for x in os.listdir(datadir) if x[:8] == 'sequence']
 all_events = [x[9:-4] for x in all_eventfiles]
 
@@ -19,27 +22,58 @@ writtenfiles = [x for x in os.listdir(eventdir) if x[-4:] == '.txt']
 all_written = [x[7:-4] for x in writtenfiles]
 non_written = sorted(list(set(all_events) - set(all_written)))
 print(len(all_events), len(all_written), len(non_written))
-quit()
 
-for eventfile in eventfiles:
-    if eventfile[9:-4] in written_ids:
-        print(eventfile, 'already processed')
-        continue
-    else:
-        print(eventfile)
-        term_burstiness = []
-        event_tweets = []
-        event_id = eventfile.split('_')[1][:-4]
-        with open(datadir + eventfile, 'r', encoding = 'utf-8') as sequence_in:
-            lines = sequence_in.read().strip().split('\n')
-        event = lines[0]
-        tokens = event.split('\t')
-        event_terms = tokens[0].split(', ')
+for event in non_written:
+    print(event)
+    terms_burstiness = []
+    event_tweets = []
+    event_id = eventfile.split('_')[1][:-4]
+    with open(datadir + eventfile, 'r', encoding = 'utf-8') as sequence_in:
+        lines = sequence_in.read().strip().split('\n')
+    event = lines[0]
+    tokens = event.split('\t')
+    event_terms = tokens[0].split(', ')
+    if len(event_terms) > 1:
         event_date = time_functions.return_datetime(tokens[1], setting = 'vs')
         date_begin = time_functions.return_datetime(tokens[2][:10], setting = 'vs')
         date_end = time_functions.return_datetime(tokens[2][11:], setting = 'vs')
         position = (event_date - date_begin).days
+        
+        for event_term in event_terms:
+
         print('calculating burstiness')
+        combis = [event_terms]
+        if len(event_terms) > 2:
+            for i in range(2, len(event_terms)):
+                for combi in (list(itertools.combinations(event_terms, i))):
+                    combis.append(list(combi))
+        for combi in combis: # combine
+            combi_sets = []
+            for et in combi:
+                combi_sets.append(set(event_term_ids[et]))
+            overlap = set.intersection(*combi_sets)
+            print(','.join(combi).encode('utf-8'), overlap)
+            overlap_timedict = defaultdict(int)
+            for tid in list(overlap):
+                overlap_timedict[str(id_date[tid].date())] += 1
+            timelist = dict2list(overlap_timedict)
+            combi_timelist[', '.join(list(combi))] = timelist
+            # calculate burstiness
+            combi_burst = []
+            for combi in combi_timelist.keys():
+                burstiscore = score_burstiness(combi_timelist[combi], position)
+                if combi_timelist[combi][position] > 9:
+                    combi_burst.append([combi, burstiscore, position])
+            combi_burst_sorted = sorted(combi_burst, key = lambda k : k[1], reverse = True)
+            for combi in combi_burst_sorted:
+                event_bursti_scores[event].append(combi[0] + ' - ' + str(combi[1]) + ' - ' + \
+                    str(combi_timelist[combi[0]][position]) + ' - ' + \
+                    ','.join([str(x) for x in combi_timelist[combi[0]]]))
+
+
+
+
+
         for termsequence in lines[1:]:
             tokens = termsequence.split('\t')
             event_term = tokens[0]
@@ -92,7 +126,7 @@ for eventfile in eventfiles:
                     print('no existing file', statfile)
                 cursor_date = cursor_date + datetime.timedelta(days = 1) 
 
-        else:
-            with open(discarded_events_file, 'a', encoding = 'utf-8') as discarded_out:
-                discarded_out.write(event_id + '\n')
+    else:
+        with open(discarded_events_file, 'a', encoding = 'utf-8') as discarded_out:
+            discarded_out.write(event_id + '\n')
 
