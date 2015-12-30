@@ -10,19 +10,25 @@ outfile_no_overlap = sys.argv[3]
 
 eventfiles = os.listdir(eventdir)
 
+print('Reading in eventfiles')
 event_ids = []
-for eventfile in eventfiles:
-    dr = docreader.Docreader()
-    dr.parse_doc(eventdir + eventfile)
-    ids = [l[0] for l in dr.lines]
-    event_ids.append((eventfile, ids))
+efs = len(eventfiles)
+for i, eventfile in enumerate(eventfiles):
+    print(eventfile, i, 'of', efs)
+    try:
+        dr = docreader.Docreader()
+        dr.parse_doc(eventdir + eventfile)
+        ids = [l[0] for l in dr.lines]
+        event_ids.append((eventfile, ids))
+    except:
+        continue
 
 num_events = len(event_ids)
 overlaps = []
 event_overlap = {}
 for event in eventfiles:
     event_overlap[event] = False
-for i, event in enumerate(event_ids[-1]):
+for i, event in enumerate(event_ids[:-1]):
     j = i + 1
     while j < num_events:
         event2 = event_ids[j]
@@ -35,6 +41,7 @@ for i, event in enumerate(event_ids[-1]):
             num_overlap2 = len(list(set(event2[1]) - set(event[1])))
             percent_overlap2 = num_overlap2 / len(event2[1])
             overlaps.append([event[0], event2[0], num_overlap1, percent_overlap1, num_overlap2, percent_overlap2])
+        j += 1
 
 with open(outfile_overlaps, 'w') as w_out:
     for ov in overlaps:
