@@ -93,12 +93,12 @@ def train_combimodels(hts):
 
     expdir = experiment_dir + '_'.join([x[1:] for x in hts]) + '/' # without '#'
 
-    if not os.path.exists(experiment_dir):
-        os.mkdir(experiment_dir)
-    event_train_dir = experiment_dir + 'event_train/'
+    if not os.path.exists(exp):
+        os.mkdir(exp)
+    event_train_dir = expdir + 'event_train/'
     if not os.path.exists(event_train_dir):
         os.mkdir(event_train_dir)
-    emotion_train_dir = experiment_dir + 'emotion_train/'
+    emotion_train_dir = expdir + 'emotion_train/'
     if not os.path.exists(emotion_train_dir):
         os.mkdir(emotion_train_dir)
 
