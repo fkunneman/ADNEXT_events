@@ -15,11 +15,13 @@ label_positive = sys.argv[1]
 label_negative = sys.argv[2]
 tweets_random = sys.argv[3]
 parts_random = sys.argv[4]
-emotiondir = sys.argv[5]
-files_dir = sys.argv[6]
-experiment_dir = sys.argv[7]
-partsdirectory = sys.argv[8]
-hashtags = sys.argv[9:]
+tweets_test = sys.argv[5]
+tweets_train = sys.argv[6]
+emotiondir = sys.argv[7]
+files_dir = sys.argv[8]
+experiment_dir = sys.argv[9]
+partsdirectory = sys.argv[10]
+hashtags = sys.argv[11:]
 
 def write_config():
     fileschunks = files_dir.split("/")
