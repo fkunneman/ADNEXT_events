@@ -17,11 +17,12 @@ tweets_random = sys.argv[3]
 parts_random = sys.argv[4]
 tweets_test = sys.argv[5]
 tweets_train = sys.argv[6]
-emotiondir = sys.argv[7]
-files_dir = sys.argv[8]
-experiment_dir = sys.argv[9]
-partsdirectory = sys.argv[10]
-hashtags = sys.argv[11:]
+parts_train = sys.argv[7]
+emotiondir = sys.argv[8]
+files_dir = sys.argv[9]
+experiment_dir = sys.argv[10]
+partsdirectory = sys.argv[11]
+hashtags = sys.argv[12:]
 
 def write_config():
     fileschunks = files_dir.split("/")
@@ -95,8 +96,8 @@ def train_combimodels(hts):
 
     expdir = experiment_dir + '_'.join([x[1:] for x in hts]) + '/' # without '#'
 
-    if not os.path.exists(exp):
-        os.mkdir(exp)
+    if not os.path.exists(expdir):
+        os.mkdir(expdir)
     event_train_dir = expdir + 'event_train/'
     if not os.path.exists(event_train_dir):
         os.mkdir(event_train_dir)
@@ -181,19 +182,19 @@ def train_combimodels(hts):
     # cleanup mixedtweetfile
     hts_emotiontweets_train = []
     for ht in hts:
-        hts_emotiontweets_train.extend(hashtag_emotiontweets[ht][0])
+        hts_emotiontweets_train.extend(hashtag_emotiontweets[ht])
     # rm overlap
     seen = {}
     for tid in list(set([x[1] for x in hts_emotiontweets_train])):
         seen[tid] = False
     hts_emotiontweets_train_clean = []
     for tweet in hts_emotiontweets_train:
-        if not seen(tweet[1]):
+        if not seen[tweet[1]]:
             hts_emotiontweets_train_clean.append(tweet)
             seen[tweet[1]] = True
     # new featurizer: rm all involved hashtags
     print('Making new training files')
-    hts_emotiontweets_train_clean_text = [line[8] for line in hts_emotiontweets_train]
+    hts_emotiontweets_train_clean_text = [line[8] for line in hts_emotiontweets_train_clean]
     hts_emotiontweets_train_clean_tagged = utils.tokenized_2_tagged(hts_emotiontweets_train_clean_text)
     find_username = re.compile("^@\w+")
     find_url = re.compile(r"^(http://|www|[^\.]+)\.([^\.]+\.)*[^\.]{2,}")
@@ -231,10 +232,10 @@ def train_combimodels(hts):
             features = [vocabulary[x].replace(' ', '_') for x in instances[index].indices]
             with open(files_dir + filename, 'w', encoding = 'utf-8') as outfile: 
                 outfile.write('\n'.join(features))
-            train.append(filename + ' ' + label_positive)
+            train.append(filename + ' ' + label_positive + '\n')
 
     # classify lcs
-    if len(random_parts_clean) < len(train):
+    if len(random_parts_clean) > len(train):
         random_sample = random.sample(random_parts_clean, len(train))
     else:
         random_sample = random_parts_clean
@@ -242,7 +243,7 @@ def train_combimodels(hts):
         train_out.write(''.join(train))
         for x in random_sample:
             tokens = x.strip().split()
-            train_out.write('\n' + tokens[0] + ' ' + label_negative)
+            train_out.write(tokens[0] + ' ' + label_negative + '\n')
 
     write_config()
     os.system("lcs --verbose")
@@ -293,7 +294,7 @@ for hashtag in hashtags:
     for i, tweet in enumerate(train_tweets_ids):
         if set([tweet]) & ids_test:
             overlap.append(i)
-    train_tweets_general_clean = [x for i, x in enumerate(tran_tweets_general) if not i in overlap]
+    train_tweets_general_clean = [x for i, x in enumerate(train_tweets_general) if not i in overlap]
     hashtag_emotiontweets[hashtag] = train_tweets_general_clean
 
 print('Extracting random tweets')
