@@ -22,7 +22,8 @@ emotiondir = sys.argv[8]
 files_dir = sys.argv[9]
 experiment_dir = sys.argv[10]
 partsdirectory = sys.argv[11]
-hashtags = sys.argv[12:]
+startindex = int(sys.argv[12])
+hashtags = sys.argv[13:]
 
 def write_config():
     fileschunks = files_dir.split("/")
@@ -239,6 +240,14 @@ def train_combimodels(hts):
         random_sample = random.sample(random_parts_clean, len(train))
     else:
         random_sample = random_parts_clean
+        difference = len(train) - len(random_parts_clean)
+        train_candidates = []
+        for p, i in enumerate(parts):
+            if not set(i) & set(all_matches):
+                train_candidates.append(p)
+        train_sample = random.sample(train_candidates, difference)
+        random_sample.extend(train_sample)
+        
     with open('train', 'w', encoding = 'utf-8') as train_out:
         train_out.write(''.join(train))
         for x in random_sample:
@@ -317,6 +326,9 @@ for i in range(2, len(hashtags)):
     for combi in itertools.combinations(hashtags, i):
         combis.append(list(combi))
 combis.append(hashtags)
+print(len(combis), 'Combis')
+combis = combis[startindex:]
+print('Starting from', startindex, ',', len(combis), 'combis left')
 
 for combi in combis:
     print('Training classifiers for ', '_'.join(combi))
