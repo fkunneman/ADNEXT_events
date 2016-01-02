@@ -5,12 +5,17 @@ import os
 import coco
 import docreader
 
-hashtag = sys.argv[1]
-label_positive = sys.argv[2]
-label_negative = sys.argv[3]
-tweets_dev = sys.argv[4]
-parts_dev = sys.argv[5]
-experiment_dir = sys.argv[6]
+label_positive = sys.argv[1]
+label_negative = sys.argv[2]
+tweets_test = sys.argv[3]
+parts_test = sys.argv[4]
+experiment_dir = sys.argv[5]
+
+words = experiment_dir.split('/')[-1].split('.')[0].split('_')
+print(words)
+hashtags = ['#' + x for x in words]
+print(hashtags)
+quit()
 
 tmpdir = 'tmp/'
 if not os.path.exists(tmpdir):
@@ -24,20 +29,23 @@ emotion_train_dir = experiment_dir + 'emotion_train/'
 if not os.path.exists(emotion_train_dir):
     os.mkdir(emotion_train_dir)
 
-# identify dev indices with hashtag
+# identify test indices with hashtag
 dr = docreader.Docreader()
-devlines = dr.parse_csv(tweets_dev)
-textlines_dev = [x[-1] for x in devlines]
+testlines = dr.parse_csv(tweets_test)
+textlines_test = [x[-1] for x in testlines]
 
-cc = coco.Coco(tmpdir)
-cc.set_lines(textlines_dev)
-cc.set_file()
-cc.model_ngramperline([hashtag])
-matches = cc.match([hashtag])[hashtag]
+matches = []
+for hashtag in hashtags:
+    cc = coco.Coco(tmpdir)
+    cc.set_lines(textlines_test)
+    cc.set_file()
+    cc.model_ngramperline([hashtag])
+    matches.extend(cc.match([hashtag])[hashtag])
+matches = sorted(list(set(matches)))
 
-ht_tweets_dev = [devlines[i] for i in matches]
-with open(parts_dev) as dev_open:
-    parts = dev_open.readlines()
+ht_tweets_test = [testlines[i] for i in matches]
+with open(parts_test) as test_open:
+    parts = test_open.readlines()
 
 test = []
 for i, instance in enumerate(parts):
