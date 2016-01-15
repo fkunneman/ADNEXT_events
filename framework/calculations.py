@@ -12,7 +12,11 @@ import numpy
 import copy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+
 import time_functions
+import featurizer
+import vectorizer
+import utils
 
 def goodness_of_fit(total,dc,ec,ode):
     g2 = 0
@@ -965,3 +969,22 @@ def score_burstiness_sequence(sequence, position):
 
 def return_idf(doc_count, total_docs):
     return math.log((total_docs / doc_count), 10)
+
+def count_tokens(lines):
+    raws = [line[textindex] for line in dr.lines]
+    tagged = utils.tokenized_2_tagged(raws)
+    feature_config = { 'token_ngrams' : {'n_list' : [1]} }
+
+    ft = featurizer.Featurizer(raws, tagged, os.getcwd(), feature_config)
+    ft.fit_transform()
+    instances, vocabulary = ft.return_instances(['token_ngrams'])
+
+    vr = vectorizer.Vectorizer(instances, instances, ['x' for x in range(len(dr.lines))], prune = 10000)
+    vr.weight_features()
+    vr.prune_features()
+    train, test, top_features, feature_weights = vr.vectorize()
+
+    top_features_vocab = [vocabulary[i] for i in top_features]
+    feature_weights = zip(top_features_vocab, feature_weights)
+
+    return feature_weights
