@@ -46,7 +46,7 @@ for eventfile in eventfiles:
                 with open(tweetsfile, 'r', encoding = 'utf-8') as tweets_in:
                     tweets = tweets_in.read().split('\n')
                 with open(outtweets, 'a', encoding = 'utf-8') as tweets_out:
-                    for event_term in selected_terms:
+                    for event_term in event_terms:
                         try:
                             term_index = terms.index(event_term)
                             term_stats = stats[term_index]
