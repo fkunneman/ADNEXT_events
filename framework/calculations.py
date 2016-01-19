@@ -970,8 +970,7 @@ def score_burstiness_sequence(sequence, position):
 def return_idf(doc_count, total_docs):
     return math.log((total_docs / doc_count), 10)
 
-def count_tokens(lines):
-    raws = [line[textindex] for line in dr.lines]
+def count_tokens(raws):
     tagged = utils.tokenized_2_tagged(raws)
     feature_config = { 'token_ngrams' : {'n_list' : [1]} }
 
@@ -979,7 +978,7 @@ def count_tokens(lines):
     ft.fit_transform()
     instances, vocabulary = ft.return_instances(['token_ngrams'])
 
-    vr = vectorizer.Vectorizer(instances, instances, ['x' for x in range(len(dr.lines))], prune = 10000)
+    vr = vectorizer.Vectorizer(instances, instances, ['x' for x in range(len(raws))], prune = 50000)
     vr.weight_features()
     vr.prune_features()
     train, test, top_features, feature_weights = vr.vectorize()

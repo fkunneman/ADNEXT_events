@@ -242,8 +242,8 @@ def train_combimodels(hts):
         random_sample = random_parts_clean
         difference = len(train) - len(random_parts_clean)
         train_candidates = []
-        for p, i in enumerate(parts):
-            if not set(i) & set(all_matches):
+        for i, p in enumerate(parts):
+            if not set([i]) & set(all_matches):
                 train_candidates.append(p)
         train_sample = random.sample(train_candidates, difference)
         random_sample.extend(train_sample)

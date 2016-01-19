@@ -1,5 +1,6 @@
 
 import sys
+from collections import defaultdict
 
 import docreader
 from framework import calculations
@@ -17,7 +18,8 @@ dr_neg = docreader.Docreader()
 dr_neg.parse_doc(negative, delimiter = '\t', header = False)
 
 print('Counting hashtags')
-hts_pos = [fc[0] for fc in calculations.count_tokens(dr_pos.lines) if fc[0][0] == '#' and fc[1] >= 10]
+fcs = calculations.count_tokens([line[0] for line in dr_pos.lines])
+hts_pos = [str(fc[0]) for fc in calculations.count_tokens([line[0] for line in dr_pos.lines]) if fc[0][0] == '#' and int(fc[1]) >= 10]
 print('Selected', len(hts_pos), 'candidate hashtags')
 
 print('Identifying lines with hashtag')
@@ -28,15 +30,16 @@ cc.set_file()
 cc.model_ngramperline(hts_pos)
 
 print('Summing up hashtag score')
-hashtag_score = defaultdict(float)
+hashtag_average = {}
 for hashtag in hts_pos:
-    print(hashtag.encode('utf-8'))
-    matches = coco.match([hashtag])
+    matches = cc.match([hashtag])[hashtag]
+    score = 0
     for match in matches:
         line = all_lines[match]
-        print(line[0].encode('utf-8'))
-        hashtag_score[hashtag] += float(line[1])
-sorted_hashtags = sorted(hashtag_score, key = hashtag_score.get, reverse = True)
-with open(outfile, 'w', encoding = 'utf-8'):
+        score += float(line[1])
+    hashtag_average[hashtag] = score / len(matches) 
+sorted_hashtags = sorted(hashtag_average, key = hashtag_average.get, reverse = True)
+with open(outfile, 'w', encoding = 'utf-8') as out:
     for hashtag in sorted_hashtags:
-        outfile.write(hashtag + '\t' + str(hashtag_score[hashtag]) + '\n')
+        out.write(hashtag + '\t' + str(hashtag_average[hashtag]) + '\n')
+

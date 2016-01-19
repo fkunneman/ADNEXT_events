@@ -33,15 +33,18 @@ selected_docs = []
 # parse output
 with open(experimentdir + 'test.rnk', 'r', encoding = 'utf-8') as output_in:
     for line in output_in.readlines():
-        tokens = line.strip().split()
-        filename = '/'.join(tokens[0].strip().split('/')[-2:])
-        classification, score = tokens[1].split()[0].split(":")
-        classification = classification.replace("?","")
-        if other_testlabel and classification != 'other':
-            classification = label
-        classifications.append([targets[filename], classification, float(score)])
-        selected_docs.append(docs[indices[filename]])
-
+        try:
+            tokens = line.strip().split()
+            filename = '/'.join(tokens[0].strip().split('/')[-3:])
+            classification, score = tokens[1].split()[0].split(":")
+            classification = classification.replace("?","")
+            if other_testlabel and classification != 'other':
+                classification = label
+            classifications.append([targets[filename], classification, float(score)])
+            selected_docs.append(docs[indices[filename]])
+        except:
+            print('wrong input', line.encode('utf-8'))
+            
 print('selected', len(selected_docs), 'docs')
 print('performing evaluation')
 output = (classifications, False, False)

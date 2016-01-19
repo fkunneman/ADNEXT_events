@@ -11,11 +11,9 @@ tweets_test = sys.argv[3]
 parts_test = sys.argv[4]
 experiment_dir = sys.argv[5]
 
-words = experiment_dir.split('/')[-1].split('.')[0].split('_')
-print(words)
+words = experiment_dir.split('/')[-2].split('_')
 hashtags = ['#' + x for x in words]
 print(hashtags)
-quit()
 
 tmpdir = 'tmp/'
 if not os.path.exists(tmpdir):

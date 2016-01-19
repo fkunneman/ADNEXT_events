@@ -13,7 +13,7 @@ textdir = sys.argv[2]
 print('collecting events')
 nums = ['0', '1', '2', '3', '4', '5', '6', '7' ,'8', '9']
 textevents = [x for x in os.listdir(textdir) if x[7] in nums]
-partsevents = [x for x in os.listdir(partsdir) if [0[]]] 
+partsevents = [x for x in os.listdir(partsdir) if x[0] in nums] 
 
 print('num text events is', len(textevents))
 print('num parts events is', len(partsevents))
@@ -23,28 +23,38 @@ seen = {}
 event_indices = defaultdict(list)
 total = 0
 
+event_parts = {}
+for event in textevents:
+    eid = event[7:-4]
+    event_parts[eid] = False
+for event in partsevents:
+    eid = event[:-4]
+    event_parts[eid] = True
+
 print('collecting unique tweets')
 for event in textevents:
     eid = event[7:-4]
-    elines = dr.parse_csv(textdir + event)
-    for l in elines:
-        seen[l[0]] = False
+    if event_parts[eid]:
+        elines = dr.parse_csv(textdir + event)
+        for l in elines:
+            seen[l[0]] = False
 
 for event in textevents:
     eid = event[7:-4]
-    elines = dr.parse_csv(textdir + event)
-    for i, l in enumerate(elines):
-        if not seen[l[0]]:
-            seen[l[0]] = True
-            total += 1
-            event_indices[eid].append(i)
+    if event_parts[eid]:
+        elines = dr.parse_csv(textdir + event)
+        for i, l in enumerate(elines):
+            if not seen[l[0]]:
+                seen[l[0]] = True
+                total += 1
+                event_indices[eid].append(i)
 
 print('num unique tweets is', total)
 print('num event keys is', len(event_indices.keys()))
 
 print('dividing train - test')
-tee = random.sample(partsevents, int(0.20 * len(partsevents)))
-tre = list(set(partsevents) - set(tee))
+tee = random.sample(event_indices.keys(), int(0.20 * len(partsevents)))
+tre = list(set(event_indices.keys()) - set(tee))
 print(len(tre), 'train events,', len(tee), 'test events,', len(tre) + len(tee), 'total events')
 
 print('collecting lines')
@@ -74,9 +84,9 @@ for event in tre:
 
 print('writing to files')
 with open(partsdir + 'parts_train_complete.txt', 'w', encoding = 'utf-8') as ptr_out:
-    ptr_out.write('\n'.join(ptrain))
+    ptr_out.write('\n'.join([x[0] for x in ptrain]))
 with open(partsdir + 'parts_test_complete.txt', 'w', encoding = 'utf-8') as ptt_out:
-    ptt_out.write('\n'.join(ptest))
+    ptt_out.write('\n'.join([x[0] for x in ptest]))
 
 lw = linewriter.Linewriter(etest)
 lw.write_csv(textdir + 'tweets_test_complete.csv')
