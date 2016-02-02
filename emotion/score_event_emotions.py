@@ -25,8 +25,8 @@ for event in events_zinin:
         for line in zin_in.readlines():
             try:
                 tokens = line.strip().split()
-                classifications = tokens[1].split()
-                classification_zinin = [x for x in classifications if x.split(":")[0] == 'zin' or x.split(":")[0] == '?zin']
+                classifications = tokens[1:]
+                classification_zinin = [x for x in classifications if x.split(":")[0] == 'zin' or x.split(":")[0] == '?zin'][0]
                 score = float(classification_zinin.split(':')[1])
                 scores_zinin.append(score)
             except:
@@ -36,10 +36,10 @@ for event in events_zinin:
             for line in teleurgesteld_in.readlines():
                 try:
                     tokens = line.strip().split()
-                    classifications = tokens[1].split()
+                    classifications = tokens[1:]
                     classifications_teleurgesteld = [x for x in classifications if x.split(":")[0] == 'teleurgesteld' \
-                        or x.split(":")[0] == '?teleurgesteld']
-                    score = float(classification_teleurgesteld.split(':')[1])
+                    or x.split(":")[0] == '?teleurgesteld'][0]
+                    score = float(classifications_teleurgesteld.split(':')[1])
                     scores_teleurgesteld.append(score)
                 except:
                     print('wrong input', line.encode('utf-8'))
@@ -47,25 +47,25 @@ for event in events_zinin:
             for line in tevreden_in.readlines():
                 try:
                     tokens = line.strip().split()
-                    classifications = tokens[1].split()
+                    classifications = tokens[1:]
                     classifications_tevreden = [x for x in classifications if x.split(":")[0] == 'tevreden' \
-                        or x.split(":")[0] == '?tevreden']
-                    score = float(classification_teleurgesteld.split(':')[1])
+                        or x.split(":")[0] == '?tevreden'][0]
+                    score = float(classifications_teleurgesteld.split(':')[1])
                     scores_tevreden.append(score)
                 except:
                     print('wrong input', line.encode('utf-8'))
     except:
         print('No after event data')
     num_zinin = len(scores_zinin)
-    mean_zinin = round(numpy.mean(scores_zinin))
-    median_zinin = round(numpy.median(scores_zinin))
+    mean_zinin = round(numpy.mean(scores_zinin), 2)
+    median_zinin = round(numpy.median(scores_zinin), 2)
     num_teleurgesteld = len(scores_teleurgesteld)
     num_tevreden = len(scores_tevreden)
     if num_teleurgesteld > 0:
-        mean_teleurgesteld = round(numpy.mean(scores_teleurgesteld))
-        median_teleurgesteld = round(numpy.median(scores_teleurgesteld))
-        mean_tevreden = round(numpy.mean(scores_tevreden))
-        median_tevreden = round(numpy.mean(scores_tevreden))
+        mean_teleurgesteld = round(numpy.mean(scores_teleurgesteld), 2)
+        median_teleurgesteld = round(numpy.median(scores_teleurgesteld), 2)
+        mean_tevreden = round(numpy.mean(scores_tevreden), 2)
+        median_tevreden = round(numpy.mean(scores_tevreden), 2)
         anticipointment_gap_mean = mean_zinin + mean_teleurgesteld
         anticipointment_gap_median = median_zinin + median_teleurgesteld
         anticifaction_gap_mean = mean_zinin + mean_tevreden
@@ -93,10 +93,10 @@ for event in lost_events:
         for line in teleurgesteld_in.readlines():
             try:
                 tokens = line.strip().split()
-                classifications = tokens[1].split()
+                classifications = tokens[1:]
                 classifications_teleurgesteld = [x for x in classifications if x.split(":")[0] == 'teleurgesteld' \
-                    or x.split(":")[0] == '?teleurgesteld']
-                score = float(classification_teleurgesteld.split(':')[1])
+                    or x.split(":")[0] == '?teleurgesteld'][0]
+                score = float(classifications_teleurgesteld.split(':')[1])
                 scores_teleurgesteld.append(score)
             except:
                 print('wrong input', line.encode('utf-8'))
@@ -104,10 +104,10 @@ for event in lost_events:
         for line in tevreden_in.readlines():
             try:
                 tokens = line.strip().split()
-                classifications = tokens[1].split()
+                classifications = tokens[1:]
                 classifications_tevreden = [x for x in classifications if x.split(":")[0] == 'tevreden' \
-                    or x.split(":")[0] == '?tevreden']
-                score = float(classification_teleurgesteld.split(':')[1])
+                    or x.split(":")[0] == '?tevreden'][0]
+                score = float(classifications_teleurgesteld.split(':')[1])
                 scores_tevreden.append(score)
             except:
                 print('wrong input', line.encode('utf-8'))
@@ -117,13 +117,9 @@ for event in lost_events:
     num_teleurgesteld = len(scores_teleurgesteld)
     num_tevreden = len(scores_tevreden)
     mean_teleurgesteld = round(numpy.mean(scores_teleurgesteld), 2)
-    median_teleurgesteld = round(numpy.median(scores_teleurgesteld))
-    mean_tevreden = round(numpy.mean(scores_tevreden))
-    median_tevreden = round(numpy.mean(scores_tevreden))
-    anticipointment_gap_mean = mean_zinin + mean_teleurgesteld
-    anticipointment_gap_median = median_zinin + median_teleurgesteld
-    anticifaction_gap_mean = mean_zinin + mean_tevreden
-    anticifaction_gap_median = median_zinin + median_tevreden
+    median_teleurgesteld = round(numpy.median(scores_teleurgesteld), 2)
+    mean_tevreden = round(numpy.mean(scores_tevreden), 2)
+    median_tevreden = round(numpy.mean(scores_tevreden), 2)
     anticipointment_gap_mean = '-'
     anticipointment_gap_median = '-'
     anticifaction_gap_mean = '-'
@@ -133,7 +129,7 @@ for event in lost_events:
         anticifaction_gap_median])
 
 event_scores_complete_only = [x for x in event_scores if x[-1] != '-']
-event_scores_complete_only_sorted = sorted(event_scores_complete_only, key = lambda K : k[10], reverse = True)
+event_scores_complete_only_sorted = sorted(event_scores_complete_only, key = lambda k : k[10], reverse = True)
 header = ['event', '#zin', 'mean zin', 'median zin', '#teleurgesteld', 'mean teleurgesteld', 'median teleurgesteld',
     '#tevreden', 'mean tevreden', 'median tevreden', 'anticipointment_gap_mean', 'anticipointment_gap_median', 
     'anticifaction_gap_mean', 'anticifaction_gap_median']
@@ -141,9 +137,16 @@ header = ['event', '#zin', 'mean zin', 'median zin', '#teleurgesteld', 'mean tel
 with open(outfile, 'w') as f_out:
     f_out.write('\t'.join(header) + '\n')
     for es in event_scores:
-        f_out.write('\t'.join([str(x) for x in es]) + '\n')
-
+        try:
+            f_out.write('\t'.join(["%.2f" % x for x in es]) + '\n')
+        except:
+            f_out.write('\t'.join([str(x) for x in es]) + '\n')
+        
 with open(outfile_complete, 'w') as f_out:
     f_out.write('\t'.join(header) + '\n')
     for es in event_scores_complete_only_sorted:
-        f_out.write('\t'.join([str(x) for x in es]) + '\n')
+        try:
+            f_out.write('\t'.join(["%.2f" % x for x in es]) + '\n')
+        except:
+            f_out.write('\t'.join([str(x) for x in es]) + '\n')
+
