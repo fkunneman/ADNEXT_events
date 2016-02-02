@@ -8,10 +8,10 @@ import os
 import itertools
 import datetime
 from collections import defaultdict
-import numpy
 import copy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import scipy.stats
 
 import time_functions
 import featurizer
@@ -987,3 +987,14 @@ def count_tokens(raws):
     feature_weights = zip(top_features_vocab, feature_weights)
 
     return feature_weights
+
+def rank_scores(scores):
+    return list(scipy.stats.rank_data(scores))
+
+def calculate_mean_reciprocal_rank(ranks):
+    # rank is list with two real numbers
+    return ((1 / ranks[0]) + (1 / ranks[1])) / 2
+
+
+
+
