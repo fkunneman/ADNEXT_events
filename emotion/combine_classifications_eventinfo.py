@@ -22,12 +22,18 @@ before_tweets = os.listdir(event_dir_before)
 after_tweets = os.listdir(event_dir_after)
 
 print('collecting event data')
-for event in classification_files_before[:2]:
+for event in classification_files_before[:1]:
     event_id = event[:-4]
     print(event_id)
     with open(classification_dir_before + event) as classifications_in:
         lines = classifications_in.readlines()
         file_score = emotion_utils.parse_lcs_classifications(lines, target_before)
     files = sorted(file_score.keys())
-    print(files)
+    doc_tweets = event_dir_before + 'tweets_' + event_id + '.csv'
+    dr = docreader.Docreader()
+    dr.parse_doc(doc_tweets)
+    for f in files:
+        index = emotion_utils.filename2tweetindex(f)
+        print(f, index)
+
 
