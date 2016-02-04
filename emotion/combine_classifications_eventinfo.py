@@ -22,7 +22,7 @@ before_tweets = os.listdir(event_dir_before)
 after_tweets = os.listdir(event_dir_after)
 
 print('collecting event data')
-for event in classification_files_before[:2]:
+for event in classification_files_before[:12]:
     event_id = event[:-4]
     print(event_id)
     with open(classification_dir_before + event) as classifications_in:
