@@ -24,3 +24,16 @@ def calculate_event_emotion_stats(scores):
     sorted_scores = sorted(scores)
     percentile = sorted_scores[int((0.9 * size))]
     return [size, mean, median, percentile]
+
+def filename2tweetindex(filename):
+    parts = filename.split('/')
+    filedir = int(parts[1].split('_')[1])
+    start_index = 25000 * filedir
+    f = parts[2][:-4]
+    print(parts, f)
+    while f[0] == '0':
+        if len(f) == 1:
+            break
+        else:
+            f = f[1:]
+    return start_index + int(f)
