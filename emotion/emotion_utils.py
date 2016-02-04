@@ -13,8 +13,7 @@ def parse_lcs_classifications(lines, target):
             file_score[filename] = score
         except:
             print('wrong input', line.encode('utf-8'))
-    scores = list(file_score.values())
-    return scores
+    return file_score
 
 def calculate_event_emotion_stats(scores):
     size = len(scores)
