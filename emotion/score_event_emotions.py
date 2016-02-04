@@ -26,19 +26,19 @@ for event in events_zinin:
     event_id = event[:-4]
 #    print(event_id)
     with open(classificationdir_zinin + event, 'r', encoding = 'utf-8') as zin_in:
-        scores_zinin = emotion_utils.parse_lcs_classifications(zin_in.readlines(), 'zin')
+        scores_zinin = list(emotion_utils.parse_lcs_classifications(zin_in.readlines(), 'zin').values())
     if len(scores_zinin) > 0:
-        stats_zinin = emotion_utils.calculate_event_emotion_stats(scores_zinin)
+        stats_zinin = list(emotion_utils.calculate_event_emotion_stats(scores_zinin).values())
     else:
         continue
     try:
         with open(classificationdir_teleurgesteld + event, 'r', encoding = 'utf-8') as teleurgesteld_in:
-            scores_teleurgesteld = emotion_utils.parse_lcs_classifications(teleurgesteld_in.readlines(), 'teleurgesteld')
+            scores_teleurgesteld = list(emotion_utils.parse_lcs_classifications(teleurgesteld_in.readlines(), 'teleurgesteld').values())
         with open(classificationdir_tevreden + event, 'r', encoding = 'utf-8') as tevreden_in:
-            scores_tevreden = emotion_utils.parse_lcs_classifications(tevreden_in.readlines(), 'tevreden')
+            scores_tevreden = list(emotion_utils.parse_lcs_classifications(tevreden_in.readlines(), 'tevreden').values())
         if len(scores_teleurgesteld) > 0:
-            stats_teleurgesteld = emotion_utils.calculate_event_emotion_stats(scores_teleurgesteld)
-            stats_tevreden = emotion_utils.calculate_event_emotion_stats(scores_tevreden)
+            stats_teleurgesteld = list(emotion_utils.calculate_event_emotion_stats(scores_teleurgesteld).values())
+            stats_tevreden = list(emotion_utils.calculate_event_emotion_stats(scores_tevreden).values())
             event_scores.append([event_id] + stats_zinin + stats_teleurgesteld + stats_tevreden)
         else:
             event_scores_half.append([event_id] + stats_zinin + ['-', '-', '-', '-', '-', '-', '-', '-'])
