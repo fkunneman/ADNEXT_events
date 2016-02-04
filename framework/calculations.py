@@ -989,12 +989,16 @@ def count_tokens(raws):
     return feature_weights
 
 def rank_scores(scores):
-    return list(scipy.stats.rank_data(scores))
+    ranks = list(len(scores) - scipy.stats.rankdata(scores).astype(int) + 1)
+    ranks = [int(x) for x in ranks]
+    return ranks
 
 def calculate_mean_reciprocal_rank(ranks):
     # rank is list with two real numbers
+#    print(ranks)
+#    print(((1 / ranks[0]) + (1 / ranks[1])) / 2)
     return ((1 / ranks[0]) + (1 / ranks[1])) / 2
 
-
-
-
+def return_percentile(scores, p):
+    position = int(p * len(scores))
+    return scores[position]
