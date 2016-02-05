@@ -27,7 +27,7 @@ for event in events[:10]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (event_date - tweet_date).days <= timewindow:
             zin_tweets.append(tweet)
-    zin_scores = [tweet[0] for tweet in zin_tweets]
+    zin_scores = [float(tweet[0]) for tweet in zin_tweets]
     if len(zin_scores) > 0:
         stats_zin = emotion_utils.calculate_event_emotion_stats(zin_scores)
         lw = linewriter.Linewriter(zin_tweets)
@@ -43,7 +43,7 @@ for event in events[:10]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (event_date - tweet_date).days <= timewindow:
             teleurgesteld_tweets.append(tweet)
-    teleurgesteld_scores = [tweet[0] for tweet in teleurgesteld_tweets]
+    teleurgesteld_scores = [float(tweet[0]) for tweet in teleurgesteld_tweets]
     if len(teleurgesteld_scores) > 0:
         stats_teleurgesteld = emotion_utils.calculate_event_emotion_stats(teleurgesteld_scores)
         lw = linewriter.Linewriter(teleurgesteld_tweets)
@@ -59,7 +59,7 @@ for event in events[:10]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (event_date - tweet_date).days <= timewindow:
             tevreden_tweets.append(tweet)
-    tevreden_scores = [tweet[0] for tweet in tevreden_tweets]
+    tevreden_scores = [float(tweet[0]) for tweet in tevreden_tweets]
     if len(tevreden_scores) > 0:
         stats_tevreden = emotion_utils.calculate_event_emotion_stats(tevreden_scores)
         lw = linewriter.Linewriter(tevreden_tweets)
