@@ -23,6 +23,7 @@ outputs = []
 for jump in jumps:
     for step in steps:
         threshold = step * jump
+        print(threshold)
         lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
         output = [threshold, len(lines)]
         x = [l[x_index] for l in lines]
@@ -43,6 +44,7 @@ for jump in jumps:
         plt.clf()
         lr = linregress(y, z)
         output.append(lr[2])
-        print(output)
         outputs.append(output)
-        quit()
+
+with open(outdir + 'correlations.txt', 'w') as c_out:
+    c_out.write('\n'.join(['\t'.join([str(k) for k in l]) for l in outputs]))

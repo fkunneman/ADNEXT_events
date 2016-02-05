@@ -22,13 +22,13 @@ event_scores = []
 event_scores_half = []
 
 print('Parsing events')
-for event in events_zinin[:10]:
+for event in events_zinin:
     event_id = event[:-4]
 #    print(event_id)
     with open(classificationdir_zinin + event, 'r', encoding = 'utf-8') as zin_in:
         scores_zinin = list(emotion_utils.parse_lcs_classifications(zin_in.readlines(), 'zin').values())
     if len(scores_zinin) > 0:
-        stats_zinin = lemotion_utils.calculate_event_emotion_stats(scores_zinin)
+        stats_zinin = emotion_utils.calculate_event_emotion_stats(scores_zinin)
     else:
         continue
     try:
@@ -134,7 +134,7 @@ print('writing to file')
 #     'rank mean tevreden', 'median tevreden', 'rank median tevreden', '0.9 percentile tevreden', 'rank 0.9 percentile tevreden', 'anticipointment mean', 'anticipointment median', 
 #     'anticifaction mean', 'anticifaction median']
 headers = ['event', '#zin', '0.7 percentile zin', '0.8 percentile zin', '0.9 percentile zin', '#teleurgesteld', 
-    '0.7 percentile teleurgesteld', '0.8 percentile teleurgesteld', '0.9 percentile teleurgesteld', 
+    '0.7 percentile teleurgesteld', '0.8 percentile teleurgesteld', '0.9 percentile teleurgesteld', '#tevreden',
     '0.7 percentile tevreden', '0.8 percentile tevreden', '0.9 percentile tevreden', 'anticipointment 0.7', 'anticipointment 0.8', 
     'anticipointment 0.9', 'anticifaction 0.7', 'anticifaction 0.8', 'anticifaction 0.9']
 header_style = {'event' : 'general', '#zin' : '0', '0.7 percentile zin' : '0.00', '0.8 percentile zin' : '0.00', 
