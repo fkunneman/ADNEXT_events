@@ -22,10 +22,11 @@ def calculate_event_emotion_stats(scores):
 #    print(size, scores)
 #    print(int((0.9 * size)))
     sorted_scores = sorted(scores)
-    percentile1 = sorted_scores[int((0.7 * size))]
-    percentile2 = sorted_scores[int((0.8 * size))]
-    percentile3 = sorted_scores[int((0.9 * size))]
-    return [size, percentile1, percentile2, percentile3]
+    percentile1 = sorted_scores[int((0.5 * size))]
+    percentile2 = sorted_scores[int((0.7 * size))]
+    percentile3 = sorted_scores[int((0.8 * size))]
+    percentile4 = sorted_scores[int((0.9 * size))]
+    return [size, percentile1, percentile2, percentile3, percentile4]
 
 def filename2tweetindex(filename):
     parts = filename.split('/')
