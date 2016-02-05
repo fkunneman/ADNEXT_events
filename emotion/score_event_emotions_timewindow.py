@@ -16,7 +16,7 @@ classifications = os.listdir(classificationdir)
 events = list(set([x.split('_')[0] for x in classifications]))
 
 new_scores = []
-for event in events[:10]:
+for event in events:
     print(event)
     # zin
     try:
@@ -81,7 +81,6 @@ for event in events[:10]:
 
 event_scores_complete = []
 for i, event in enumerate(new_scores):
-    print(event)
     anticipointment1 = event[2] + event[7]
     anticipointment2 = event[3] + event[8]
     anticipointment3 = event[4] + event[9]
@@ -107,4 +106,4 @@ header_style = {'event' : 'general', '#zin' : '0', '0.5 percentile zin' : '0.00'
     'anticifaction 0.5': '0.00', 'anticifaction 0.7' : '0.00', 'anticifaction 0.8' : '0.00', 'anticifaction 0.9' : '0.00'}
 
 lw = linewriter.Linewriter(event_scores_complete)
-lw.write_xls(headers, header_style, outfile_complete)
+lw.write_xls(headers, header_style, scores_out)
