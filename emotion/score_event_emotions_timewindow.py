@@ -33,7 +33,7 @@ for event in events[:10]:
         lw = linewriter.Linewriter(zin_tweets)
         lw.write_txt(new_classifications + event + '_zin.txt')
     else:
-        stats_zin = ['-', '-', '-', '-', '-']
+        continue
     # teleurgesteld
     dr_teleurgesteld = docreader.Docreader()
     dr_teleurgesteld.parse_doc(classificationdir + event + '_teleurgesteld.txt')
@@ -49,7 +49,7 @@ for event in events[:10]:
         lw = linewriter.Linewriter(teleurgesteld_tweets)
         lw.write_txt(new_classifications + event + '_teleurgesteld.txt')
     else:
-        stats_teleurgesteld = ['-', '-', '-', '-', '-']
+        continue
     # tevreden
     dr_tevreden = docreader.Docreader()
     dr_tevreden.parse_doc(classificationdir + event + '_tevreden.txt')
@@ -65,12 +65,14 @@ for event in events[:10]:
         lw = linewriter.Linewriter(tevreden_tweets)
         lw.write_txt(new_classifications + event + '_tevreden.txt')
     else:
-        stats_tevreden = ['-', '-', '-', '-', '-']
+        continue
     # append data
-    new_scores.append([event] + stats_zin + stats_teleurgesteld + stats_tevreden)
+    new_score = [event] + stats_zin + stats_teleurgesteld + stats_tevreden
+    new_scores.append(new_score)
 
 event_scores_complete = []
 for i, event in enumerate(new_scores):
+    print(event)
     anticipointment1 = event[2] + event[7]
     anticipointment2 = event[3] + event[8]
     anticipointment3 = event[4] + event[9]
