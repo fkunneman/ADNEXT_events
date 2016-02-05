@@ -23,6 +23,7 @@ outputs = []
 for jump in jumps:
     for step in steps:
         threshold = step * jump
+        print(threshold)
         lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
         output = [threshold, len(lines)]
         x = [l[x_index] for l in lines]
