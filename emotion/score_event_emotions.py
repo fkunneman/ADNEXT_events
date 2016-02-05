@@ -11,8 +11,8 @@ import linewriter
 classificationdir_zinin = sys.argv[1]
 classificationdir_teleurgesteld = sys.argv[2]
 classificationdir_tevreden = sys.argv[3]
-outfile = sys.argv[4]
-outfile_complete = sys.argv[5]
+#outfile = sys.argv[4]
+outfile_complete = sys.argv[4]
 
 events_zinin = os.listdir(classificationdir_zinin)
 events_teleurgesteld = os.listdir(classificationdir_teleurgesteld)
