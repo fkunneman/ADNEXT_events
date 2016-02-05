@@ -19,8 +19,11 @@ new_scores = []
 for event in events[:10]:
     print(event)
     # zin
-    dr_zin = docreader.Docreader()
-    dr_zin.parse_doc(classificationdir + event + '_zin.txt')
+    try:
+        dr_zin = docreader.Docreader()
+        dr_zin.parse_doc(classificationdir + event + '_zin.txt')
+    except:
+        continue
     event_date = time_functions.return_datetime(dr_zin.lines[0][-1], setting = 'vs')
     zin_tweets = []
     for tweet in dr_zin.lines[1:]:
@@ -35,8 +38,11 @@ for event in events[:10]:
     else:
         continue
     # teleurgesteld
-    dr_teleurgesteld = docreader.Docreader()
-    dr_teleurgesteld.parse_doc(classificationdir + event + '_teleurgesteld.txt')
+    try:
+        dr_teleurgesteld = docreader.Docreader()
+        dr_teleurgesteld.parse_doc(classificationdir + event + '_teleurgesteld.txt')
+    except:
+        continue
     event_date = time_functions.return_datetime(dr_teleurgesteld.lines[0][-1], setting = 'vs')
     teleurgesteld_tweets = []
     for tweet in dr_teleurgesteld.lines[1:]:
@@ -51,8 +57,11 @@ for event in events[:10]:
     else:
         continue
     # tevreden
-    dr_tevreden = docreader.Docreader()
-    dr_tevreden.parse_doc(classificationdir + event + '_tevreden.txt')
+    try:
+        dr_tevreden = docreader.Docreader()
+        dr_tevreden.parse_doc(classificationdir + event + '_tevreden.txt')
+    except:
+        continue
     event_date = time_functions.return_datetime(dr_tevreden.lines[0][-1], setting = 'vs')
     tevreden_tweets = []
     for tweet in dr_tevreden.lines[1:]:
