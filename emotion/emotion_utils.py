@@ -17,13 +17,15 @@ def parse_lcs_classifications(lines, target):
 
 def calculate_event_emotion_stats(scores):
     size = len(scores)
-    mean = numpy.mean(scores)
-    median = numpy.median(scores)
+    #mean = numpy.mean(scores)
+    #median = numpy.median(scores)
 #    print(size, scores)
 #    print(int((0.9 * size)))
     sorted_scores = sorted(scores)
-    percentile = sorted_scores[int((0.9 * size))]
-    return [size, mean, median, percentile]
+    percentile1 = sorted_scores[int((0.7 * size))]
+    percentile2 = sorted_scores[int((0.8 * size))]
+    percentile3 = sorted_scores[int((0.9 * size))]
+    return [size, percentile1, percentile2, percentile3]
 
 def filename2tweetindex(filename):
     parts = filename.split('/')
