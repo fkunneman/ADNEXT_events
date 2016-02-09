@@ -1002,3 +1002,12 @@ def calculate_mean_reciprocal_rank(ranks):
 def return_percentile(scores, p):
     position = int(p * len(scores))
     return scores[position]
+
+def calculate_harmonic_mean(scores):
+    divide = 0
+    for score in scores:
+        divide += 1/score
+    harmonic_mean = len(scores) / divide
+    return harmonic_mean
+
+
