@@ -29,22 +29,25 @@ for jump in jumps:
         x = [l[x_index] for l in lines]
         y = [l[y_index] for l in lines]
         z = [l[z_index] for l in lines]
-        plt.scatter(x, y)
-        plt.savefig(outdir + 'scatter_xy_' + str(threshold) + '.png')
-        plt.clf()
-        lr = linregress(x, y)
-        output.append(lr[2])
-        plt.scatter(x, z)
-        plt.savefig(outdir + 'scatter_xz_' + str(threshold) + '.png')
-        plt.clf()
-        lr = linregress(x, z)
-        output.append(lr[2])
-        plt.scatter(y, z)
-        plt.savefig(outdir + 'scatter_yz_' + str(threshold) + '.png')
-        plt.clf()
-        lr = linregress(y, z)
-        output.append(lr[2])
-        outputs.append(output)
+        try:
+            plt.scatter(x, y)
+            plt.savefig(outdir + 'scatter_xy_' + str(threshold) + '.png')
+            plt.clf()
+            lr = linregress(x, y)
+            output.append(lr[2])
+            plt.scatter(x, z)
+            plt.savefig(outdir + 'scatter_xz_' + str(threshold) + '.png')
+            plt.clf()
+            lr = linregress(x, z)
+            output.append(lr[2])
+            plt.scatter(y, z)
+            plt.savefig(outdir + 'scatter_yz_' + str(threshold) + '.png')
+            plt.clf()
+            lr = linregress(y, z)
+            output.append(lr[2])
+            outputs.append(output)
+        except ValueError:
+            continue
 
 with open(outdir + 'correlations.txt', 'w') as c_out:
     c_out.write('\n'.join(['\t'.join([str(k) for k in l]) for l in outputs]))

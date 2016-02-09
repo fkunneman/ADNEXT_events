@@ -7,7 +7,7 @@ import docreader
 
 classificationdir = sys.argv[1]
 plot_out = sys.argv[2]
-event_threshold = sys.argv[3]
+event_threshold = int(sys.argv[3])
 
 classifications = os.listdir(classificationdir)
 events = list(set([x.split('_')[0] for x in classifications]))

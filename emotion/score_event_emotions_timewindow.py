@@ -47,7 +47,7 @@ for event in events:
     teleurgesteld_tweets = []
     for tweet in dr_teleurgesteld.lines[1:]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
-        if (event_date - tweet_date).days <= timewindow:
+        if (tweet_date - event_date).days <= timewindow:
             teleurgesteld_tweets.append(tweet)
     teleurgesteld_scores = [float(tweet[0]) for tweet in teleurgesteld_tweets]
     if len(teleurgesteld_scores) > 0:
@@ -66,7 +66,7 @@ for event in events:
     tevreden_tweets = []
     for tweet in dr_tevreden.lines[1:]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
-        if (event_date - tweet_date).days <= timewindow:
+        if (tweet_date - event_date).days <= timewindow:
             tevreden_tweets.append(tweet)
     tevreden_scores = [float(tweet[0]) for tweet in tevreden_tweets]
     if len(tevreden_scores) > 0:
