@@ -13,7 +13,11 @@ y_index = int(sys.argv[5])
 z_index = int(sys.argv[6])
 outdir = sys.argv[7]
 lower_bound = int(sys.argv[8]) # 0 or real number
+filtered_events = sys.argv[9]
 
+with open(filtered_events) as fe_open:
+    f_events = fe_open.read().split('\n')
+    
 steps = [1, 2, 5]
 jumps = [1, 10, 100, 1000, 10000]
 
@@ -25,10 +29,10 @@ for jump in jumps:
     for step in steps:
         if lower_bound:
             if (step*jump) > lower_bound:
-                upper_threshold = step * jump
-                print(upper_threshold)
+                threshold = step * jump
+                print(threshold)
                 lines = [l for l in dr.lines[1:] if l[freq_index_before] > lower_bound and l[freq_index_before] < upper_threshold and 
-                    l[freq_index_after] > lower_bound and l[freq_index_after] < upper_threshold]
+                    l[freq_index_after] > lower_bound and l[freq_index_after] < upper_threshold and (set(l[0]) & set(f_events))]
                 output = [upper_threshold, len(lines)]
                 x = [l[x_index] for l in lines]
                 y = [l[y_index] for l in lines]
@@ -38,7 +42,7 @@ for jump in jumps:
         else:
             threshold = step * jump
             print(threshold)
-            lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
+            lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold and (set(l[0]) & set(f_events))]
             output = [threshold, len(lines)]
             x = [l[x_index] for l in lines]
             y = [l[y_index] for l in lines]

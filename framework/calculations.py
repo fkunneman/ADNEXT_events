@@ -1004,10 +1004,13 @@ def return_percentile(scores, p):
     return scores[position]
 
 def calculate_harmonic_mean(scores):
-    divide = 0
-    for score in scores:
-        divide += 1/score
-    harmonic_mean = len(scores) / divide
+    if len([x for x in scores if x >= 1]) == len(scores): 
+        divide = 0
+        for score in scores:
+            divide += 1/score
+        harmonic_mean = len(scores) / divide
+    else:
+        harmonic_mean = 0.0
     return harmonic_mean
 
 
