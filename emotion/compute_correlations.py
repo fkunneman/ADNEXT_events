@@ -12,6 +12,7 @@ x_index = int(sys.argv[4])
 y_index = int(sys.argv[5])
 z_index = int(sys.argv[6])
 outdir = sys.argv[7]
+lower_bound = int(sys.argv[8]) # 0 or real number
 
 steps = [1, 2, 5]
 jumps = [1, 10, 100, 1000, 10000]
@@ -22,13 +23,26 @@ dr.parse_doc(event_scores)
 outputs = []
 for jump in jumps:
     for step in steps:
-        threshold = step * jump
-        print(threshold)
-        lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
-        output = [threshold, len(lines)]
-        x = [l[x_index] for l in lines]
-        y = [l[y_index] for l in lines]
-        z = [l[z_index] for l in lines]
+        if lower_bound:
+            if (step*jump) > lower_bound:
+                upper_threshold = step * jump
+                print(upper_threshold)
+                lines = [l for l in dr.lines[1:] if l[freq_index_before] > lower_bound and l[freq_index_before] < upper_threshold and 
+                    l[freq_index_after] > lower_bound and l[freq_index_after] < upper_threshold]
+                output = [upper_threshold, len(lines)]
+                x = [l[x_index] for l in lines]
+                y = [l[y_index] for l in lines]
+                z = [l[z_index] for l in lines]
+            else:
+                continue
+        else:
+            threshold = step * jump
+            print(threshold)
+            lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
+            output = [threshold, len(lines)]
+            x = [l[x_index] for l in lines]
+            y = [l[y_index] for l in lines]
+            z = [l[z_index] for l in lines]
         try:
             plt.scatter(x, y)
             plt.savefig(outdir + 'scatter_xy_' + str(threshold) + '.png')
