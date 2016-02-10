@@ -4,7 +4,7 @@ import sys
 import os
 from collections import defaultdict
 import numpy
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 
 import time_functions
 
@@ -34,22 +34,23 @@ def fill_timebins(tweets, event_date):
     return avgs
 
 for event in events:
+    print(event)
     with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
         lines = eo.readlines()
         event_data = lines[0].strip()
         tweets_zin = lines[1:]
-    with open(classifications_dir + event_id + '_teleurgesteld.txt', 'r', encoding = 'utf-8') as eo:
+    with open(classifications_dir + event + '_teleurgesteld.txt', 'r', encoding = 'utf-8') as eo:
         tweets_teleurgesteld = eo.readlines()[1:]
-    with open(classifications_dir + event_id + '_tevreden.txt', 'r', encoding = 'utf-8') as eo:
+    with open(classifications_dir + event + '_tevreden.txt', 'r', encoding = 'utf-8') as eo:
         tweets_tevreden = eo.readlines()[1:]
     event_date = time_functions.return_datetime(event_data.split('\t')[1], setting = 'vs')
     avgs_zin = fill_timebins(tweets_zin, event_date)
     avgs_teleurgesteld = fill_timebins(tweets_teleurgesteld, event_date)
     avgs_tevreden = fill_timebins(tweets_tevreden, event_date)
     x = range(range_begin, range_end)
-    plt.plot(x, avg_zin, linestyle = '-', linewidth = 2)
-    plt.plot(x, avg_teleurgesteld, linestyle = '--', linewidth = 2)
-    plt.plot(x, avg_tevreden, linestyle = ':', linewidth = 2)
+    plt.plot(x, avgs_zin, linestyle = '-', linewidth = 2)
+    plt.plot(x, avgs_teleurgesteld, linestyle = '--', linewidth = 2)
+    plt.plot(x, avgs_tevreden, linestyle = ':', linewidth = 2)
     plt.xlabel('Days in relation to event date')
     plt.ylabel('Avg classifier score for emotion')
     legend = ['Positive expectation', 'Disappointment', 'Satisfaction']
