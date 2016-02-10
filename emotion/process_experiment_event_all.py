@@ -240,7 +240,7 @@ overlap = []
 for i, tweet in enumerate(random_tweets_ids):
     if set([tweet]) & ids_test:
         overlap.append(i)
-random_tweets_clean = [x for i, x in enumerate(train_tweets) if not i in overlap]
+random_tweets_clean = [x for i, x in enumerate(random_tweets) if not i in overlap]
 
 ############ train classifier ##################
 print('Training classifiers for ', '_'.join(combi))
