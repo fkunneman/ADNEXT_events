@@ -74,5 +74,5 @@ plt.xlabel('Days in relation to event date')
 plt.ylabel('0.90 percentile classifier score for emotion')
 legend = ['Positive expectation', 'Disappointment', 'Satisfaction']
 plt.legend(legend,  loc = "upper right")
-plt.savefig(outdir + 'timeplot_' + event + '.png', bbox_inches = "tight")
+plt.savefig(outdir + 'timeplot_total.png', bbox_inches = "tight")
 plt.clf()
