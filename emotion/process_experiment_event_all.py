@@ -14,14 +14,12 @@ import featurizer
 label_positive = sys.argv[1]
 label_negative = sys.argv[2]
 tweets_random = sys.argv[3]
-parts_random = sys.argv[4]
-tweets_events = sys.argv[5]
-parts_events = sys.argv[6]
-emotiondir = sys.argv[7]
-files_dir = sys.argv[8]
-expdir = sys.argv[9]
-partsdirectory = sys.argv[10]
-combi = sys.argv[11:]
+tweets_test = sys.argv[4]
+emotiondir = sys.argv[5]
+files_dir = sys.argv[6]
+expdir = sys.argv[7]
+partsdirectory = sys.argv[8]
+combi = sys.argv[9:]
 
 def write_config():
     fileschunks = files_dir.split("/")
@@ -93,25 +91,8 @@ def write_config():
 
 def train_combimodels(hts):
 
-    #expdir = experiment_dir + '_'.join([x[1:] for x in hts]) + '/' # without '#'
-
     if not os.path.exists(expdir):
         os.mkdir(expdir)
-    #event_train_dir = expdir + 'event_train/'
-    #if not os.path.exists(event_train_dir):
-    #    os.mkdir(event_train_dir)
-    #emotion_train_dir = expdir + 'emotion_train/'
-    #if not os.path.exists(emotion_train_dir):
-    #    os.mkdir(emotion_train_dir)
-
-    #print('Train events')
-
-    all_matches = []
-    for ht in hts:
-        all_matches.extend(hashtag_trainmatches[ht])
-    all_matches = sorted(list(set(all_matches)))
-
-    #################################################
 
     print('Train emotion')
     # cleanup mixedtweetfile
@@ -169,26 +150,52 @@ def train_combimodels(hts):
                 outfile.write('\n'.join(features))
             train.append(filename + ' ' + label_positive + '\n')
 
-    # classify lcs
-    if len(random_parts_clean) > len(train):
-        random_sample = random.sample(random_parts_clean, len(train))
-    else:
-        random_sample = random_parts_clean
-        difference = len(train) - len(random_parts_clean)
-        with open(parts_events) as train_open:
-            parts = train_open.readlines()
-        train_candidates = []
-        for i, p in enumerate(parts):
-            if not set([i]) & set(all_matches):
-                train_candidates.append(p)
-        train_sample = random.sample(train_candidates, difference)
-        random_sample.extend(train_sample)
-        
+    # take sample of random tweets
+    random_sample = random.sample(random_tweets_clean, len(train))
+
+    # new featurizer: rm all involved hashtags
+    print('Making new training files')
+    random_clean_text = [line[5] for line in random_sample]
+    random_clean_text_tagged = utils.tokenized_2_tagged(random_clean_text)
+    find_username = re.compile("^@\w+")
+    find_url = re.compile(r"^(http://|www|[^\.]+)\.([^\.]+\.)*[^\.]{2,}")
+    new_tweets_tagged = []
+    for tweet in random_clean_text:
+        new_tweet = []
+        for token in tweet:
+            if find_username.match(token[0]):
+                token[0] = '_USER_'
+            elif find_url.match(token[0]):
+                token[0] = '_URL_'
+            else:
+                token[0] = token[0].lower()
+            new_tweet.append(token)
+        new_tweets_tagged.append(new_tweet)
+
+    print('Extracting features')
+    featuredict = {'token_ngrams' : {'n_list': [1, 2, 3], 'blackfeats' : ['_USER_', '_URL_'] + hts}} # with '#'
+    ft = featurizer.Featurizer(hts_emotiontweets_train_clean_tagged, new_tweets_tagged, partsdirectory, featuredict)
+    ft.fit_transform()
+    instances, vocabulary = ft.return_instances(['token_ngrams'])
+
+    # make chunks of 25000 from the data
+    chunks = [range(instances.shape[0])]
+    for i, chunk in enumerate(chunks):
+        # make subdirectory
+        subpart = 'final_other/'
+        subdir = files_dir + subpart
+        if not os.path.isdir(subdir):
+            os.mkdir(subdir)
+        for j, index in enumerate(chunk):
+            zeros = 5 - len(str(j))
+            filename = subpart + ('0' * zeros) + str(j) + '.txt'
+            features = [vocabulary[x].replace(' ', '_') for x in instances[index].indices]
+            with open(files_dir + filename, 'w', encoding = 'utf-8') as outfile: 
+                outfile.write('\n'.join(features))
+            train.append(filename + ' ' + label_negative + '\n')
+
     with open('train', 'w', encoding = 'utf-8') as train_out:
         train_out.write(''.join(train))
-        for x in random_sample:
-            tokens = x.strip().split()
-            train_out.write(tokens[0] + ' ' + label_negative + '\n')
 
     write_config()
     os.system("lcs --verbose")
@@ -202,59 +209,38 @@ if not os.path.exists(tmpdir):
 
 print('Reading in test tweets')
 # identify test indices with hashtag
-#dr = docreader.Docreader()
-#testlines = dr.parse_csv(tweets_test)
-#textlines_test = [x[-1] for x in testlines]
-
-print('Reading in train tweets')
-# identify train indices with hashtag
 dr = docreader.Docreader()
-trainlines = dr.parse_csv(tweets_events)
-textlines_train = [x[-1] for x in trainlines]
-
-print('Identifying hashtag matches')
-hashtag_trainmatches = {}
-
-cc = coco.Coco(tmpdir)
-cc.set_lines(textlines_train)
-cc.set_file()
-for hashtag in combi:    
-    print(hashtag)
-    cc.model_ngramperline([hashtag]) # with '#'
-    hashtag_trainmatches[hashtag] = cc.match([hashtag])[hashtag]
+testlines = dr.parse_csv(tweets_test)
+textlines_test = [x[-1] for x in testlines]
 
 # select emotion tweets positive and negative
 print('Extracting emotion tweets')
 hashtag_emotiontweets = {}
 
-#ids_test = set([x[0] for x in testlines])
+ids_test = set([x[0] for x in testlines])
 dr = docreader.Docreader()
 for hashtag in combi:
     print(hashtag)
     tweets_hashtag = emotiondir + hashtag + '.csv'
     parts_hashtag = partsdirectory + hashtag[1:] + '.txt'
     train_tweets_general = dr.parse_csv(tweets_hashtag)
-    #train_tweets_ids = [x[1] for x in train_tweets_general]
-    #overlap = [] 
-    #for i, tweet in enumerate(train_tweets_ids):
-    #    if set([tweet]) & ids_test:
-    #        overlap.append(i)
-    #train_tweets_general_clean = [x for i, x in enumerate(train_tweets_general) if not i in overlap]
-    hashtag_emotiontweets[hashtag] = train_tweets_general
+    train_tweets_ids = [x[1] for x in train_tweets_general]
+    overlap = [] 
+    for i, tweet in enumerate(train_tweets_ids):
+        if set([tweet]) & ids_test:
+            overlap.append(i)
+    train_tweets_general_clean = [x for i, x in enumerate(train_tweets_general) if not i in overlap]
+    hashtag_emotiontweets[hashtag] = train_tweets_general_clean
 
 print('Extracting random tweets')
 dr = docreader.Docreader()
 random_tweets = dr.parse_csv(tweets_random)
 random_tweets_ids = [x[0] for x in random_tweets]
-#overlap = [] 
-#for i, tweet in enumerate(random_tweets_ids):
-#    if set([tweet]) & ids_test:
-#        overlap.append(i)   
-with open(parts_random) as pr_open:
-    random_parts = pr_open.readlines()
-#print('random size before:', len(random_parts))
-random_parts_clean = random_parts
-#print('random size after:', len(random_parts_clean))
+overlap = [] 
+for i, tweet in enumerate(random_tweets_ids):
+    if set([tweet]) & ids_test:
+        overlap.append(i)
+random_tweets_clean = [x for i, x in enumerate(train_tweets) if not i in overlap]
 
 ############ train classifier ##################
 print('Training classifiers for ', '_'.join(combi))
