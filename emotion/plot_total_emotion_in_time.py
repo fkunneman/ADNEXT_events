@@ -4,7 +4,7 @@ import sys
 import os
 from collections import defaultdict
 import numpy
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 
 import time_functions
 import calculations
@@ -28,9 +28,10 @@ def fill_timebins(tweets, event_date):
 
 def return_prcs(d):
     prcs = [] 
+    ks = d.keys()
     for timebin in range(range_begin, range_end):
-        if timebin in d:
-            prcs.append(calculations.return_percentile(timebin_scores[timebin], 0.9))
+        if timebin in ks:
+            prcs.append(calculations.return_percentile(d[timebin], 0.9))
         else:
             prcs.append(0)
     return prcs
@@ -46,11 +47,15 @@ for event in unique_events:
         lines = eo.readlines()
         event_data = lines[0].strip()
         tweets_zin = lines[1:]
-    with open(classifications_dir + event_id + '_teleurgesteld.txt', 'r', encoding = 'utf-8') as eo:
-        tweets_teleurgesteld = eo.readlines()[1:]
-    with open(classifications_dir + event_id + '_tevreden.txt', 'r', encoding = 'utf-8') as eo:
-        tweets_tevreden = eo.readlines()[1:]
+    try:
+        with open(classifications_dir + event + '_teleurgesteld.txt', 'r', encoding = 'utf-8') as eo:
+            tweets_teleurgesteld = eo.readlines()[1:]
+        with open(classifications_dir + event + '_tevreden.txt', 'r', encoding = 'utf-8') as eo:
+            tweets_tevreden = eo.readlines()[1:]
+    except:
+        continue
     if len(tweets_zin) > 50 and len(tweets_teleurgesteld) > 50:  
+        print(event)
         event_date = time_functions.return_datetime(event_data.split('\t')[1], setting = 'vs')
         zin = fill_timebins(tweets_zin, event_date)
         for k in zin.keys():
@@ -73,6 +78,6 @@ plt.plot(x, prcs_tevreden, linestyle = ':', linewidth = 2)
 plt.xlabel('Days in relation to event date')
 plt.ylabel('0.90 percentile classifier score for emotion')
 legend = ['Positive expectation', 'Disappointment', 'Satisfaction']
-plt.legend(legend,  loc = "upper right")
+plt.legend(legend,  loc = "upper left")
 plt.savefig(outdir + 'timeplot_total.png', bbox_inches = "tight")
 plt.clf()
