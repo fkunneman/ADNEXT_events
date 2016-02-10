@@ -160,7 +160,7 @@ def train_combimodels(hts):
     find_username = re.compile("^@\w+")
     find_url = re.compile(r"^(http://|www|[^\.]+)\.([^\.]+\.)*[^\.]{2,}")
     new_tweets_tagged = []
-    for tweet in random_clean_text:
+    for tweet in random_clean_text_tagged:
         new_tweet = []
         for token in tweet:
             if find_username.match(token[0]):
