@@ -25,7 +25,7 @@ for event in events:
     except:
         continue
     event_date = time_functions.return_datetime(dr_zin.lines[0][-1], setting = 'vs')
-    zin_tweets = []
+    zin_tweets = [dr_zin.lines[0]]
     for tweet in dr_zin.lines[1:]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (event_date - tweet_date).days <= timewindow:
@@ -44,7 +44,7 @@ for event in events:
     except:
         continue
     event_date = time_functions.return_datetime(dr_teleurgesteld.lines[0][-1], setting = 'vs')
-    teleurgesteld_tweets = []
+    teleurgesteld_tweets = [dr_teleurgesteld.lines[0]]
     for tweet in dr_teleurgesteld.lines[1:]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (tweet_date - event_date).days <= timewindow:
@@ -63,7 +63,7 @@ for event in events:
     except:
         continue
     event_date = time_functions.return_datetime(dr_tevreden.lines[0][-1], setting = 'vs')
-    tevreden_tweets = []
+    tevreden_tweets = [dr_tevreden.lines[0]]
     for tweet in dr_tevreden.lines[1:]:
         tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
         if (tweet_date - event_date).days <= timewindow:
