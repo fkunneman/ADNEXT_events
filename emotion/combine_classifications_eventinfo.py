@@ -40,7 +40,7 @@ for event in classification_files_before:
         for f in files:
             index = emotion_utils.filename2tweetindex(f)
             tweet = dr.lines[index]
-            new_tweets.append([float(file_score[f]), tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
+            new_tweets.append([float(file_score[f][0]), file_score[f][1], tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
         new_tweets_sorted = sorted(new_tweets, key = lambda k : k[0], reverse = True)
         new_tweets_sorted = [[str(y) for y in x] for x in new_tweets_sorted]
         eventfile = event_info_dir + 'sequence_' + event_id + '.txt'
@@ -71,7 +71,7 @@ for event in classification_files_after1:
         for f in files:
             index = emotion_utils.filename2tweetindex(f)
             tweet = dr.lines[index]
-            new_tweets.append([float(file_score[f]), tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
+            new_tweets.append([float(file_score[f][0]), file_score[f][1], tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
         new_tweets_sorted = sorted(new_tweets, key = lambda k : k[0], reverse = True)
         new_tweets_sorted = [[str(y) for y in x] for x in new_tweets_sorted]
         eventfile = event_info_dir + 'sequence_' + event_id + '.txt'
@@ -101,7 +101,7 @@ for event in classification_files_after2:
         for f in files:
             index = emotion_utils.filename2tweetindex(f)
             tweet = dr.lines[index]
-            new_tweets.append([float(file_score[f]), tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
+            new_tweets.append([float(file_score[f][0]), file_score[f][1], tweet[0], tweet[2], tweet[3], tweet[4], tweet[5]])
         new_tweets_sorted = sorted(new_tweets, key = lambda k : k[0], reverse = True)
         new_tweets_sorted = [[str(y) for y in x] for x in new_tweets_sorted]
         eventfile = event_info_dir + 'sequence_' + event_id + '.txt'

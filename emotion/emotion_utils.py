@@ -9,7 +9,12 @@ def parse_lcs_classifications(lines, target):
             filename = '/'.join(tokens[0].strip().split('/')[-3:])
             classifications = tokens[1:]
             classification_target = [x for x in classifications if x.split(":")[0] == target or x.split(":")[0] == '?' + target][0]
-            score = float(classification_target.split(':')[1])
+            score = [float(classification_target.split(':')[1])]
+            classification = classifications[0].split(':')[0]
+            if classification == target or classification == '?' + target:
+                score.append(target)
+            else:
+                score.append('other')
             file_score[filename] = score
         except:
             print('wrong input', line.encode('utf-8'))
