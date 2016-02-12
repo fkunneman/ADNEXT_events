@@ -10,8 +10,8 @@ import time_functions
 
 classifications_dir = sys.argv[1]
 outdir = sys.argv[2]
-range_begin = sys.argv[3]
-range_end = sys.argv[4]
+range_begin = int(sys.argv[3])
+range_end = int(sys.argv[4])
 events = sys.argv[5:]
 
 timebins = {}
