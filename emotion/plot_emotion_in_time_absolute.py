@@ -10,20 +10,20 @@ import time_functions
 
 classifications_dir = sys.argv[1]
 outdir = sys.argv[2]
-events = sys.argv[3:]
+range_begin = sys.argv[3]
+range_end = sys.argv[4]
+events = sys.argv[5:]
 
-range_begin = -120
-range_end = 121
 timebins = {}
 step = 6
-i = -120
+i = range_begin
 while i < -5:
     for j in range(i, i+step):
         timebins[j] = i
     i += step
 
 i = 1
-while i < 116:
+while i < (range_end - 4):
     for j in range(i, i+step):
         timebins[j] = i+(step-1)
     i += step
