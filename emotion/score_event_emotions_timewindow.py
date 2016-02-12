@@ -43,13 +43,12 @@ for event in events:
         dr_teleurgesteld.parse_doc(classificationdir + event + '_teleurgesteld.txt')
     except:
         continue
-    event_date = time_functions.return_datetime(dr_teleurgesteld.lines[0][-1], setting = 'vs')
     teleurgesteld_tweets = [dr_teleurgesteld.lines[0]]
     for tweet in dr_teleurgesteld.lines[1:]:
-        tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
+        tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
         if (tweet_date - event_date).days <= timewindow:
             teleurgesteld_tweets.append(tweet)
-    teleurgesteld_scores = [float(tweet[0]) for tweet in teleurgesteld_tweets]
+    teleurgesteld_scores = [[float(tweet[0]), tweet[1]] for tweet in teleurgesteld_tweets]
     if len(teleurgesteld_scores) > 0:
         stats_teleurgesteld = emotion_utils.calculate_event_emotion_stats(teleurgesteld_scores)
         lw = linewriter.Linewriter(teleurgesteld_tweets)
@@ -62,13 +61,12 @@ for event in events:
         dr_tevreden.parse_doc(classificationdir + event + '_tevreden.txt')
     except:
         continue
-    event_date = time_functions.return_datetime(dr_tevreden.lines[0][-1], setting = 'vs')
     tevreden_tweets = [dr_tevreden.lines[0]]
     for tweet in dr_tevreden.lines[1:]:
-        tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
+        tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
         if (tweet_date - event_date).days <= timewindow:
             tevreden_tweets.append(tweet)
-    tevreden_scores = [float(tweet[0]) for tweet in tevreden_tweets]
+    tevreden_scores = [[float(tweet[0]), tweet[1]] for tweet in tevreden_tweets]
     if len(tevreden_scores) > 0:
         stats_tevreden = emotion_utils.calculate_event_emotion_stats(tevreden_scores)
         lw = linewriter.Linewriter(tevreden_tweets)
@@ -76,34 +74,23 @@ for event in events:
     else:
         continue
     # append data
-    new_score = [event] + stats_zin + stats_teleurgesteld + stats_tevreden
+    new_score = [event] + stats_zin + stats_teleurgesteld + stats_tevreden[1:]
     new_scores.append(new_score)
 
-event_scores_complete = []
-for i, event in enumerate(new_scores):
-    anticipointment1 = event[2] + event[7]
-    anticipointment2 = event[3] + event[8]
-    anticipointment3 = event[4] + event[9]
-    anticipointment4 = event[5] + event[10]
-    anticifaction1 = event[2] + event[11]
-    anticifaction2 = event[3] + event[12]
-    anticifaction3 = event[4] + event[13]
-    anticifaction4 = event[5] + event[14]
-    event_scores_complete.append(event + [anticipointment1, anticipointment2, anticipointment3, anticipointment4,
-        anticifaction1, anticifaction2, anticifaction3, anticifaction4])
-
-headers = ['event', '#zin', '0.5 percentile zin', '0.7 percentile zin', '0.8 percentile zin', '0.9 percentile zin', '#teleurgesteld', 
-    '0.5 percentile teleurgesteld', '0.7 percentile teleurgesteld', '0.8 percentile teleurgesteld', '0.9 percentile teleurgesteld', 
-    '#tevreden', '0.5 percentile tevreden', '0.7 percentile tevreden', '0.8 percentile tevreden', '0.9 percentile tevreden', 
-    'anticipointment 0.5', 'anticipointment 0.7', 'anticipointment 0.8', 'anticipointment 0.9', 
-    'anticifaction 0.5', 'anticifaction 0.7', 'anticifaction 0.8', 'anticifaction 0.9']
-header_style = {'event' : 'general', '#zin' : '0', '0.5 percentile zin' : '0.00', '0.7 percentile zin' : '0.00', 
-    '0.8 percentile zin' : '0.00', '0.9 percentile zin' : '0.00', '#teleurgesteld' : '0', '0.5 percentile teleurgesteld' : '0.00', 
-    '0.7 percentile teleurgesteld' : '0.00', '0.8 percentile teleurgesteld' : '0.00', '0.9 percentile teleurgesteld' : '0.00', 
-    '#tevreden' : '0', '0.5 percentile tevreden' : '0.00', '0.7 percentile tevreden' : '0.00', 
-    '0.8 percentile tevreden' : '0.00', '0.9 percentile tevreden' : '0.00', 
-    'anticipointment 0.5': '0.00', 'anticipointment 0.7': '0.00', 'anticipointment 0.8' : '0.00', 'anticipointment 0.9' : '0.00',
-    'anticifaction 0.5': '0.00', 'anticifaction 0.7' : '0.00', 'anticifaction 0.8' : '0.00', 'anticifaction 0.9' : '0.00'}
+[size, percent_emotion, mean, percentile1, percentile2, percentile3, percentile4]
+headers = ['event', '#before', 'Percent zin', 'Average zin', '0.5 percentile zin', '0.7 percentile zin', 
+    '0.8 percentile zin', '0.9 percentile zin', '#after', 'Percent teleurgesteld', 'Average teleurgesteld', 
+    '0.5 percentile teleurgesteld', '0.7 percentile teleurgesteld', '0.8 percentile teleurgesteld', 
+    '0.9 percentile teleurgesteld', 'Percent tevreden', 'Average tevreden', '0.5 percentile tevreden', 
+    '0.7 percentile tevreden', '0.8 percentile tevreden', '0.9 percentile tevreden']
+header_style = {'event' : 'general', '#before' : '0', 'Percent zin' : '0.00', 'Average zin' : '0.00', 
+    '0.5 percentile zin' : '0.00', '0.7 percentile zin' : '0.00', '0.8 percentile zin' : '0.00', 
+    '0.9 percentile zin' : '0.00', '#after' : '0', 'Percent teleurgesteld' : '0.00', 
+    'Average teleurgesteld' : '0.00','0.5 percentile teleurgesteld' : '0.00', 
+    '0.7 percentile teleurgesteld' : '0.00', '0.8 percentile teleurgesteld' : '0.00', 
+    '0.9 percentile teleurgesteld' : '0.00', 'Percent tevreden' : '0.00', 'Average tevreden' : '0.00', 
+    '0.5 percentile tevreden' : '0.00', '0.7 percentile tevreden' : '0.00', '0.8 percentile tevreden' : '0.00', 
+    '0.9 percentile tevreden' : '0.00'}
 
 lw = linewriter.Linewriter(event_scores_complete)
 lw.write_xls(headers, header_style, scores_out)
