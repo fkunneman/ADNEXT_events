@@ -16,18 +16,18 @@ outdir = sys.argv[3]
 
 range_begin = -120
 range_end = 121
-timebins = defaultdict(list)
+timebins = {}
 step = 6
 i = -120
-while i < 0:
+while i < -5:
     for j in range(i, i+step):
         timebins[j] = i
     i += step
 
-i = 0
-while i < 121:
+i = 1
+while i < 116:
     for j in range(i, i+step):
-        timebins[j] = i+step
+        timebins[j] = i+(step-1)
     i += step
 
 def fill_timebins(tweets, event_date):
@@ -37,8 +37,10 @@ def fill_timebins(tweets, event_date):
         classification = tokens[1]
         dt = time_functions.return_datetime(tokens[4], tokens[5], setting = 'vs')
         d = dt - event_date
-        tfe = (d.days * 24) + (d.seconds / 3600)
-        if tfe >= range_begin and tfe < range_end:
+        tfe = int((d.days * 24) + (d.seconds / 3600))
+        if tfe > 23:
+            tfe = tfe - 24
+        if tfe >= range_begin and tfe < range_end and tfe != 0:
             timebin_classifications[timebins[tfe]].append(classification)
     return timebin_classifications
 
@@ -60,7 +62,7 @@ with open(unique_events_file) as ue:
 timebin_zin = defaultdict(list)
 timebin_teleurgesteld = defaultdict(list)
 timebin_tevreden = defaultdict(list)
-for event in unique_events[:100]:
+for event in unique_events:
     with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
         lines = eo.readlines()
         event_data = lines[0].strip()
@@ -79,36 +81,33 @@ for event in unique_events[:100]:
         for k in zin.keys():
             timebin_zin[k].extend(zin[k])
         teleurgesteld = fill_timebins(tweets_teleurgesteld, event_date)
+        tel = False
         for k in teleurgesteld.keys():
             timebin_teleurgesteld[k].extend(teleurgesteld[k])
         tevreden = fill_timebins(tweets_tevreden, event_date)
         for k in tevreden.keys():
             timebin_tevreden[k].extend(tevreden[k])
 
-keys = sorted(list(set(timebins.values())))
-counts_zin = return_counts(timebin_zin)
-counts_teleurgesteld = return_counts(timebin_teleurgesteld)
-counts_tevreden = return_counts(timebin_tevreden)
+keys = sorted(list(set(timebins.values())) + [0])
+counts_zin = return_counts(keys, timebin_zin, 'zin')
+counts_teleurgesteld = return_counts(keys, timebin_teleurgesteld, 'teleurgesteld')
+counts_tevreden = return_counts(keys, timebin_tevreden, 'tevreden')
 
-t1 = [x[0] for x in counts_zin if x[0] != None] 
-t2 = [x[0] for x in counts_teleurgesteld if x[0] != None]
-t3 = [x[0] for x in counts_tevreden if x[0] != None]
-t = t1 + [None] + t2
-print('T1*********\n', t1)
-print('T2*********\n', t2)
-print('T3*********\n', t3)
-print('T*********\n', t)
+t1 = [x[0] for x in counts_zin[:21]] 
+t2 = [x[0] for x in counts_teleurgesteld[21:]]
+t = t1 + t2
 
 plot_zin = [x[1] for x in counts_zin]
 plot_tevreden = [x[1] for x in counts_tevreden]
 plot_teleurgesteld = [x[1] for x in counts_teleurgesteld]
 
-plt.plot(x, prcs_zin, linestyle = '-', linewidth = 2)
-plt.plot(x, prcs_teleurgesteld, linestyle = '--', linewidth = 2)
-plt.plot(x, prcs_tevreden, linestyle = ':', linewidth = 2)
+plt.plot(keys, t, linestyle = '-', linewidth = 2)
+plt.plot(keys, plot_zin, linestyle = '-.', linewidth = 2)
+plt.plot(keys, plot_teleurgesteld, linestyle = '--', linewidth = 2)
+plt.plot(keys, plot_tevreden, linestyle = ':', linewidth = 2)
 plt.xlabel('Hours in relation to event date')
 plt.ylabel('Number of tweets')
-legend = ['Total tweets', 'Tweets expressing positive expectation', 'Tweets expressing disappointment', 'Tweets expressing satisfaction']
+legend = ['Total tweets', 'Positive expectation', 'Disappointment', 'Satisfaction']
 plt.legend(legend,  loc = "upper left")
 plt.savefig(outdir + 'timeplot_total_freqs.png', bbox_inches = "tight")
 plt.clf()
