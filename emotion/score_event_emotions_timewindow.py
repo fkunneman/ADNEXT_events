@@ -19,7 +19,7 @@ with open(unique_events_file) as ue:
     unique_events = ue.read().split('\n')
 
 new_scores = []
-for event in events[:10]:
+for event in events:
     if event in unique_events:
         print(event)
         # zin
@@ -34,7 +34,7 @@ for event in events[:10]:
             tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
             if (event_date - tweet_date).days <= timewindow:
                 zin_tweets.append(tweet)
-        zin_scores = [[float(tweet[0]), tweet[1]] for tweet in zin_tweets]
+        zin_scores = [[float(tweet[0]), tweet[1]] for tweet in zin_tweets[1:]]
         if len(zin_scores) < 50:
             continue
         # teleurgesteld
@@ -48,7 +48,7 @@ for event in events[:10]:
             tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
             if (tweet_date - event_date).days <= timewindow:
                 teleurgesteld_tweets.append(tweet)
-        teleurgesteld_scores = [[float(tweet[0]), tweet[1]] for tweet in teleurgesteld_tweets]
+        teleurgesteld_scores = [[float(tweet[0]), tweet[1]] for tweet in teleurgesteld_tweets[1:]]
         if len(teleurgesteld_scores) < 50:
             continue
         # tevreden
@@ -62,21 +62,20 @@ for event in events[:10]:
             tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
             if (tweet_date - event_date).days <= timewindow:
                 tevreden_tweets.append(tweet)
-        tevreden_scores = [[float(tweet[0]), tweet[1]] for tweet in tevreden_tweets]
+        tevreden_scores = [[float(tweet[0]), tweet[1]] for tweet in tevreden_tweets[1:]]
         # append data
-        stats_zin = emotion_utils.calculate_event_emotion_stats(zin_scores)
+        stats_zin = emotion_utils.calculate_event_emotion_stats(zin_scores, 'zin')
         lw = linewriter.Linewriter(zin_tweets)
         lw.write_txt(new_classifications + event + '_zin.txt')
-        stats_teleurgesteld = emotion_utils.calculate_event_emotion_stats(teleurgesteld_scores)
+        stats_teleurgesteld = emotion_utils.calculate_event_emotion_stats(teleurgesteld_scores, 'teleurgesteld')
         lw = linewriter.Linewriter(teleurgesteld_tweets)
         lw.write_txt(new_classifications + event + '_teleurgesteld.txt')
-        stats_tevreden = emotion_utils.calculate_event_emotion_stats(tevreden_scores)
+        stats_tevreden = emotion_utils.calculate_event_emotion_stats(tevreden_scores, 'tevreden')
         lw = linewriter.Linewriter(tevreden_tweets)
         lw.write_txt(new_classifications + event + '_tevreden.txt')
         new_score = [event] + stats_zin + stats_teleurgesteld + stats_tevreden[1:]
         new_scores.append(new_score)
 
-[size, percent_emotion, mean, percentile1, percentile2, percentile3, percentile4]
 headers = ['event', '#before', 'Percent zin', 'Average zin', '0.5 percentile zin', '0.7 percentile zin', 
     '0.8 percentile zin', '0.9 percentile zin', '#after', 'Percent teleurgesteld', 'Average teleurgesteld', 
     '0.5 percentile teleurgesteld', '0.7 percentile teleurgesteld', '0.8 percentile teleurgesteld', 
@@ -91,5 +90,5 @@ header_style = {'event' : 'general', '#before' : '0', 'Percent zin' : '0.00', 'A
     '0.5 percentile tevreden' : '0.00', '0.7 percentile tevreden' : '0.00', '0.8 percentile tevreden' : '0.00', 
     '0.9 percentile tevreden' : '0.00'}
 
-lw = linewriter.Linewriter(event_scores_complete)
+lw = linewriter.Linewriter(new_scores)
 lw.write_xls(headers, header_style, scores_out)
