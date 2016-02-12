@@ -20,18 +20,19 @@ def parse_lcs_classifications(lines, target):
             print('wrong input', line.encode('utf-8'))
     return file_score
 
-def calculate_event_emotion_stats(scores):
+def calculate_event_emotion_stats(scores, target):
     size = len(scores)
-    #mean = numpy.mean(scores)
-    #median = numpy.median(scores)
-#    print(size, scores)
-#    print(int((0.9 * size)))
-    sorted_scores = sorted(scores)
+    classifications = [x[1] for x in scores]
+    positive_classifications = classifications.count(target)
+    percent_emotion = positive_classifications / size
+    sorted_scores = sorted([x[0] for x in scores])
+    mean = numpy.mean(sorted_scores)
     percentile1 = sorted_scores[int((0.5 * size))]
     percentile2 = sorted_scores[int((0.7 * size))]
     percentile3 = sorted_scores[int((0.8 * size))]
     percentile4 = sorted_scores[int((0.9 * size))]
-    return [size, percentile1, percentile2, percentile3, percentile4]
+
+    return [size, percent_emotion, mean, percentile1, percentile2, percentile3, percentile4]
 
 def filename2tweetindex(filename):
     parts = filename.split('/')

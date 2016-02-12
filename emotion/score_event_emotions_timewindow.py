@@ -27,10 +27,10 @@ for event in events:
     event_date = time_functions.return_datetime(dr_zin.lines[0][-1], setting = 'vs')
     zin_tweets = [dr_zin.lines[0]]
     for tweet in dr_zin.lines[1:]:
-        tweet_date = time_functions.return_datetime(tweet[3], setting = 'vs')
+        tweet_date = time_functions.return_datetime(tweet[4], setting = 'vs')
         if (event_date - tweet_date).days <= timewindow:
             zin_tweets.append(tweet)
-    zin_scores = [float(tweet[0]) for tweet in zin_tweets]
+    zin_scores = [[float(tweet[0]), tweet[1]] for tweet in zin_tweets]
     if len(zin_scores) > 0:
         stats_zin = emotion_utils.calculate_event_emotion_stats(zin_scores)
         lw = linewriter.Linewriter(zin_tweets)
