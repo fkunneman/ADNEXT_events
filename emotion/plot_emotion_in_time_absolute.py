@@ -86,9 +86,9 @@ for event in events:
     plt.plot(keys, plot_zin, linestyle = '-.', linewidth = 2)
     plt.plot(keys, plot_teleurgesteld, linestyle = '--', linewidth = 2)
     plt.plot(keys, plot_tevreden, linestyle = ':', linewidth = 2)
-    plt.xlabel('Days in relation to event date')
-    plt.ylabel('Avg classifier score for emotion')
-    legend = ['Positive expectation', 'Disappointment', 'Satisfaction']
-    plt.legend(legend,  loc = "upper right")
+    plt.xlabel('Hours in relation to event date')
+    plt.ylabel('Number of tweets')
+    legend = ['Total tweets', 'Positive expectation', 'Disappointment', 'Satisfaction']
+    plt.legend(legend,  loc = "upper left")
     plt.savefig(outdir + 'timeplot_' + event + '.png', bbox_inches = "tight")
     plt.clf()
