@@ -55,7 +55,7 @@ def return_counts(bs, d, target):
     return counts
 
 keys = sorted(list(set(timebins.values())) + [0])
-half = len(keys) / 2
+half = int((len(keys) + 1) / 2)
 for event in events:
     print(event)
     with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:

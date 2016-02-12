@@ -16,7 +16,7 @@ classifications = os.listdir(classificationdir)
 events = list(set([x.split('_')[0] for x in classifications]))
 
 new_scores = []
-for event in events:
+for event in events[:10]:
     print(event)
     # zin
     try:
