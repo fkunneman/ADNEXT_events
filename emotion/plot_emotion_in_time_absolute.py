@@ -55,6 +55,7 @@ def return_counts(bs, d, target):
     return counts
 
 keys = sorted(list(set(timebins.values())) + [0])
+half = len(keys) / 2
 for event in events:
     print(event)
     with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
@@ -72,8 +73,8 @@ for event in events:
     counts_zin = return_counts(keys, timebins_zin, 'zin')
     counts_teleurgesteld = return_counts(keys, timebins_teleurgesteld, 'teleurgesteld')
     counts_tevreden = return_counts(keys, timebins_tevreden, 'tevreden')
-    t1 = [x[0] for x in counts_zin[:21]] 
-    t2 = [x[0] for x in counts_teleurgesteld[21:]]
+    t1 = [x[0] for x in counts_zin[:half]] 
+    t2 = [x[0] for x in counts_teleurgesteld[half:]]
     t = t1 + t2
 
     plot_zin = [x[1] for x in counts_zin]
