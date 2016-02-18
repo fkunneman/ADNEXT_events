@@ -52,7 +52,7 @@ for event in classification_files_before:
                 sout.write(event_terms + '\t' + event_date + '\n')
                 sout.write('\n'.join(['\t'.join(x) for x in new_tweets_sorted]))
     except:
-        print('no good file', event_id)
+        print('no good file', event)
         continue
 
 print('collecting event data after')
