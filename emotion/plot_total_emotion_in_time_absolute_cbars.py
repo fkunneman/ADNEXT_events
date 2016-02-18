@@ -102,10 +102,13 @@ timebin_zin = defaultdict(list)
 timebin_teleurgesteld = defaultdict(list)
 timebin_tevreden = defaultdict(list)
 for event in unique_events[:100]:
-    with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
-        lines = eo.readlines()
-        event_data = lines[0].strip()
-        tweets_zin = lines[1:]
+    try:
+        with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
+            lines = eo.readlines()
+            event_data = lines[0].strip()
+            tweets_zin = lines[1:]
+    except:
+        continue
     try:
         with open(classifications_dir + event + '_teleurgesteld.txt', 'r', encoding = 'utf-8') as eo:
             tweets_teleurgesteld = eo.readlines()[1:]
