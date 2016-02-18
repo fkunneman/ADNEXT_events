@@ -30,9 +30,11 @@ for jump in jumps:
                 lines = [l for l in dr.lines[1:] if l[freq_index_before] > lower_bound and l[freq_index_before] < threshold and 
                     l[freq_index_after] > lower_bound and l[freq_index_after] < threshold]
                 output = [threshold, len(lines)]
-                x = [l[x_index] for l in lines]
-                y = [l[y_index] for l in lines]
-                z = [l[z_index] for l in lines]
+                ind = [[l[x_index], l[y_index], l[z_index]] for l in lines if l[x_index] != None and l[y_index] != None and l[z_index] != None]
+                x = [l[0] for l in ind]
+                y = [l[1] for l in ind]
+                z = [l[2] for l in ind]
+                sizes = [4 for l in ind]
             else:
                 continue
         else:
@@ -40,25 +42,30 @@ for jump in jumps:
             print(threshold)
             lines = [l for l in dr.lines[1:] if l[freq_index_before] > threshold and l[freq_index_after] > threshold]
             output = [threshold, len(lines)]
-            x = [l[x_index] for l in lines]
-            y = [l[y_index] for l in lines]
-            z = [l[z_index] for l in lines]
+            ind = [[l[x_index], l[y_index], l[z_index]] for l in lines if l[x_index] != None and l[y_index] != None and l[z_index] != None]
+            x = [l[0] for l in ind]
+            y = [l[1] for l in ind]
+            z = [l[2] for l in ind]
+            sizes = [4 for l in ind]
         try:
-            plt.scatter(x, y)
+            plt.scatter(x, y, s = sizes)
+            plt.axis((0, 1, 0, 1))
             plt.savefig(outdir + 'scatter_xy_' + str(threshold) + '.png')
             plt.clf()
             lr = linregress(x, y)
-            output.append(lr[2])
-            plt.scatter(x, z)
+            output.append(str(round(lr[2], 2)) + ' (' + str(round(lr[3], 2)) + ')')
+            plt.scatter(x, z, s = sizes)
+            plt.axis((0, 1, 0, 1))
             plt.savefig(outdir + 'scatter_xz_' + str(threshold) + '.png')
             plt.clf()
             lr = linregress(x, z)
-            output.append(lr[2])
-            plt.scatter(y, z)
+            output.append(str(round(lr[2], 2)) + ' (' + str(round(lr[3], 2)) + ')')
+            plt.scatter(y, z, s = sizes)
+            plt.axis((0, 1, 0, 1))
             plt.savefig(outdir + 'scatter_yz_' + str(threshold) + '.png')
             plt.clf()
             lr = linregress(y, z)
-            output.append(lr[2])
+            output.append(str(round(lr[2], 2)) + ' (' + str(round(lr[3], 2)) + ')')
             outputs.append(output)
         except ValueError:
             continue

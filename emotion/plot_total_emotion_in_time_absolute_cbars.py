@@ -57,7 +57,7 @@ def fill_timebins_doublec(tweets_c1, tweets_c2, event_date):
     for tweet in tweets_c2:
         tokens = tweet.split('\t')
         tid = tokens[2]
-        tid_tweet[tid] = tweet
+        tid_tokens[tid] = tweet
         classification = tokens[1]
         tid_classifications[tid].append(classification)
     for tid in tid_classifications.keys():
@@ -65,11 +65,11 @@ def fill_timebins_doublec(tweets_c1, tweets_c2, event_date):
         if classifications.count('other') == 2:
             cc = 'other'
         elif classifications.count('teleurgesteld') == 1:
-            cc == 'teleurgesteld'
+            cc = 'teleurgesteld'
         elif classifications.count('tevreden') == 1:
-            cc == 'tevreden'
+            cc = 'tevreden'
         else:
-            cc == 'mixed'
+            cc = 'mixed'
         tokens = tid_tokens[tid]
         dt = time_functions.return_datetime(tokens[4], tokens[5], setting = 'vs')
         d = dt - event_date
@@ -101,7 +101,7 @@ with open(unique_events_file) as ue:
 timebin_zin = defaultdict(list)
 timebin_teleurgesteld = defaultdict(list)
 timebin_tevreden = defaultdict(list)
-for event in unique_events:
+for event in unique_events[:100]:
     with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
         lines = eo.readlines()
         event_data = lines[0].strip()
@@ -119,7 +119,7 @@ for event in unique_events:
         zin = fill_timebins(tweets_zin, event_date)
         for k in zin.keys():
             timebin_zin[k].extend(zin[k])
-        teleurgesteld_tevreden = fill_timebins(tweets_teleurgesteld, tweets_tevreden, event_date)
+        teleurgesteld_tevreden = fill_timebins_doublec(tweets_teleurgesteld, tweets_tevreden, event_date)
         for k in teleurgesteld_tevreden.keys():
             timebin_teleurgesteld_tevreden[k].extend(teleurgesteld_tevreden[k])
 

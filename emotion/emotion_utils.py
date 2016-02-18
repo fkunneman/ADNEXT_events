@@ -24,13 +24,19 @@ def calculate_event_emotion_stats(scores, target):
     size = len(scores)
     classifications = [x[1] for x in scores]
     positive_classifications = classifications.count(target)
-    percent_emotion = positive_classifications / size
-    sorted_scores = sorted([x[0] for x in scores])
-    mean = numpy.mean(sorted_scores)
-    percentile1 = sorted_scores[int((0.5 * size))]
-    percentile2 = sorted_scores[int((0.7 * size))]
-    percentile3 = sorted_scores[int((0.8 * size))]
-    percentile4 = sorted_scores[int((0.9 * size))]
+    if size > 0:
+        if positive_classifications > 0:
+            percent_emotion = positive_classifications / size
+        else:
+            percent_emotion = 0.0
+        sorted_scores = sorted([x[0] for x in scores])
+        mean = numpy.mean(sorted_scores)
+        percentile1 = sorted_scores[int((0.5 * size))]
+        percentile2 = sorted_scores[int((0.7 * size))]
+        percentile3 = sorted_scores[int((0.8 * size))]
+        percentile4 = sorted_scores[int((0.9 * size))]
+    else:
+        percent_emotion, mean, percentile1, percentile2, percentile3, percentile4 = None, None, None, None, None, None
 
     return [size, percent_emotion, mean, percentile1, percentile2, percentile3, percentile4]
 
