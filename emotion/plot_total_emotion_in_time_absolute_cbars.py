@@ -144,11 +144,11 @@ plt.bar(keys, vals_mixed, 5, color = 'purple', bottom = list(map(sum, zip(vals_z
 plt.bar(keys, vals_tevreden, 5, color = 'lightskyblue', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed))))
 #print(len(vals_other), len(vals_tevreden), vals_other, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
 plt.bar(keys, vals_other, 5, color = 'white', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
-plt.plot(keys, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden, vals_other))))
+#plt.plot(keys, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden, vals_other))))
 
 plt.xlabel('Hours in relation to event date')
 plt.ylabel('Number of tweets')
-legend = ['Total', 'PE', 'D', 'D + S', 'S', 'Other']
+legend = ['PE', 'D', 'D + S', 'S', 'Other']
 plt.legend(legend,  loc = "upper left")
 plt.savefig(outdir + 'timeplot_total_freqs_bar.png', bbox_inches = "tight")
 plt.clf()
