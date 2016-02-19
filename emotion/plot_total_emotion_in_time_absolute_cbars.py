@@ -57,19 +57,19 @@ def fill_timebins_doublec(tweets_c1, tweets_c2, event_date):
     for tweet in tweets_c2:
         tokens = tweet.split('\t')
         tid = tokens[2]
-        tid_tokens[tid] = tweet
+        tid_tokens[tid] = tokens
         classification = tokens[1]
         tid_classifications[tid].append(classification)
     for tid in tid_classifications.keys():
         classifications = tid_classifications[tid]
         if classifications.count('other') == 2:
             cc = 'other'
+        elif classifications.count('other') == 0:
+            cc = 'mixed'
         elif classifications.count('teleurgesteld') == 1:
             cc = 'teleurgesteld'
         elif classifications.count('tevreden') == 1:
             cc = 'tevreden'
-        else:
-            cc = 'mixed'
         tokens = tid_tokens[tid]
         dt = time_functions.return_datetime(tokens[4], tokens[5], setting = 'vs')
         d = dt - event_date
@@ -77,7 +77,10 @@ def fill_timebins_doublec(tweets_c1, tweets_c2, event_date):
         if tfe > 23:
             tfe = tfe - 24
         if tfe >= range_begin and tfe < range_end and tfe != 0:
-            timebin_classifications[timebins[tfe]].append(cc)
+            try:
+                timebin_classifications[timebins[tfe]].append(cc)
+            except:
+                print(classifications)
     return timebin_classifications
 
 def return_counts(bs, d, targets):
@@ -91,7 +94,7 @@ def return_counts(bs, d, targets):
                 bincounts.append(c)
             counts.append(bincounts)
         else:
-            bincounts = [None] * len(targets)
+            bincounts = [0] * len(targets)
             counts.append(bincounts)
     return counts
 
@@ -99,9 +102,8 @@ with open(unique_events_file) as ue:
     unique_events = ue.read().split('\n')
 
 timebin_zin = defaultdict(list)
-timebin_teleurgesteld = defaultdict(list)
-timebin_tevreden = defaultdict(list)
-for event in unique_events[:100]:
+timebin_teleurgesteld_tevreden = defaultdict(list)
+for event in unique_events:
     try:
         with open(classifications_dir + event + '_zin.txt', 'r', encoding = 'utf-8') as eo:
             lines = eo.readlines()
@@ -130,35 +132,23 @@ keys = sorted(list(set(timebins.values())) + [0])
 counts_before = return_counts(keys, timebin_zin, ['zin', 'other'])
 counts_after = return_counts(keys, timebin_teleurgesteld_tevreden, ['teleurgesteld', 'tevreden', 'mixed', 'other'])
 
-t1 = [x[0] for x in counts_zin[:21]] 
-t2 = [x[0] for x in counts_after[21:]]
-t = t1 + t2
-
-vals_other = [x[0] for x in counts_zin] + [x[3] for x in counts_after]
-vals_zin = [x[1] for x in counts_zin]
+vals_other = [x[1] for x in counts_before[:21]] + [x[3] for x in counts_after[21:]]
+vals_zin = [x[0] for x in counts_before]
 vals_teleurgesteld = [x[0] for x in counts_after]
 vals_mixed = [x[2] for x in counts_after]
 vals_tevreden = [x[1] for x in counts_after]
 
-plt.plot(keys, t, linestyle = '-', linewidth = 2)
-plt.plot(keys, plot_zin, linestyle = '-.', linewidth = 2)
-plt.plot(keys, plot_teleurgesteld, linestyle = '--', linewidth = 2)
-plt.plot(keys, plot_tevreden, linestyle = ':', linewidth = 2)
-
-A = [5., 30., 45., 22.]
-B = [5., 25., 50., 20.]
-
-X = range(4)
-
-plt.bar(keys, vals_zin, color = 'g')
-plt.bar(keys, vals_teleurgesteld, color = 'r', bottom = vals_zin)
-plt.bar(keys, vals_mixed, color = 'purple', bottom = vals_teleurgesteld)
-plt.bar(keys, vals_tevreden, color = 'lightskyblue', bottom = vals_mixed)
-plt.bar(keys, vals_other, color = 'b', bottom = vals_tevreden)
+plt.bar(keys, vals_zin, 5, color = 'g')
+plt.bar(keys, vals_teleurgesteld, 5, color = 'r', bottom = list(map(sum, zip(vals_zin))))
+plt.bar(keys, vals_mixed, 5, color = 'purple', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld))))
+plt.bar(keys, vals_tevreden, 5, color = 'lightskyblue', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed))))
+#print(len(vals_other), len(vals_tevreden), vals_other, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
+plt.bar(keys, vals_other, 5, color = 'white', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
+plt.plot(keys, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden, vals_other))))
 
 plt.xlabel('Hours in relation to event date')
 plt.ylabel('Number of tweets')
-legend = ['PE', 'D', 'D + S', 'S', 'other']
+legend = ['Total', 'PE', 'D', 'D + S', 'S', 'Other']
 plt.legend(legend,  loc = "upper left")
 plt.savefig(outdir + 'timeplot_total_freqs_bar.png', bbox_inches = "tight")
 plt.clf()
