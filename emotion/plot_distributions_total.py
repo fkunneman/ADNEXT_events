@@ -55,14 +55,14 @@ for event in events:
         #plt.savefig(plot_out + 'dist_tevreden_' + event + '.png')
         #plt.clf()
 
-plt.hist(zin_scores)
-plt.savefig(plot_out + 'dist_tevreden.png')
+plt.hist(zin_scores, bins = range(-80, 80, 5))
+plt.savefig(plot_out + 'dist_zin.png')
 plt.clf()
 
-plt.hist(teleurgesteld_scores)
-plt.savefig(plot_out + 'dist_tevreden.png')
+plt.hist(teleurgesteld_scores, bins = range(-80, 80, 5))
+plt.savefig(plot_out + 'dist_teleurgesteld.png')
 plt.clf()
 
-plt.hist(tevreden_scores)
+plt.hist(tevreden_scores, bins = range(-80, 80, 5))
 plt.savefig(plot_out + 'dist_tevreden.png')
 plt.clf()

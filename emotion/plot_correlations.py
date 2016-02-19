@@ -19,10 +19,10 @@ def cfile_to_plotinput(cfile, plotindex):
     output = []
     for line in lines:
         tokens = line.split('\t')
-        if tokens[0] == '5000':
-            break
-        else:
-            output.append([tokens[0], tokens[1], tokens[plotindex].split()[0]])
+        #if tokens[0] == '5000':
+        #    break
+        #else:
+        output.append([tokens[0], tokens[1], tokens[plotindex].split()[0]])
 
     return output
 
