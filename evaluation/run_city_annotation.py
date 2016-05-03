@@ -10,8 +10,8 @@ out_w = open(outfile, 'a', encoding = 'utf-8')
 print('\nUSER INFORMATION:\n\nDit is het programma voor het annoteren van de locatie van events. Succes!\n\n')
 
 with open(eventfile, encoding = 'utf-8') as ef:
-    for line in eventfile.readlines()[index:]:
-        tokens = line.split('\t')
+    for line in ef.readlines()[index:]:
+        tokens = line.strip().split('\t')
         date = tokens[0]
         terms = tokens[1]
         locs = tokens[2].split('|')
@@ -24,7 +24,7 @@ with open(eventfile, encoding = 'utf-8') as ef:
         for tweet in tweets[:10]:
             print(tweet.encode('utf-8'))
         time.sleep(0.25)
-        print('\nMOGELIJKE LOCATIE:\n'loc)
+        print('\nMOGELIJKE LOCATIE:\n',loc)
         useful = 'NA'
         while useful == 'NA':
             print('CORRECTE LOCATIE? \n')
@@ -32,7 +32,7 @@ with open(eventfile, encoding = 'utf-8') as ef:
             if inputUser == 'j':
                 tokens.append('C')
                 useful = '1'
-            elif inputUser = 'n':
+            elif inputUser == 'n':
                 print('ANDERE LOCATIE? \n')
                 inputUser = input()
                 if inputUser == 'n':

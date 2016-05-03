@@ -1,5 +1,6 @@
 
 import sys
+import re
 from collections import defaultdict
 
 import calculations
@@ -13,7 +14,7 @@ print('reading events')
 score_event = []
 with open(eventfile, encoding = 'utf-8') as er:
     for line in er.readlines():
-        tokens = line.split('\t')
+        tokens = line.strip().split('\t')
         date = tokens[0]
         score = float(tokens[1])
         keyterms = tokens[2].split(',')
@@ -37,8 +38,9 @@ for event in events:
     total = 0
     tweets = event[2]
     for tweet in tweets:
-        cities = calculations.return_cities([tweet], citylist)
+        cities = calculations.return_cities([tweet], citylist)[1]
         for city in cities:
+#            print(' '.join(city).encode('utf-8'))
             if not (city == "nederland" or city == "--"):
                 places[city] += 1
                 total += 1
@@ -46,8 +48,8 @@ for event in events:
         places_out = []
         sorted_places = sorted(places, key=places.get, reverse=True)
         for place in sorted_places:
-            tp_score = sorted_places[place]/total
-            places_out.append([place, tp_score])
+            tp_score = places[place]/total
+            places_out.append([place, str(tp_score)])
     else:
         places_out = [['---', '---']]
     events_out.write('\t'.join([event[0], ', '.join(event[1]), '|'.join(' / '.join(x) for x in places_out), '-----'.join(event[2])]) + '\n')
