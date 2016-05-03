@@ -111,9 +111,8 @@ for event in events:
     event_date = time_functions.return_datetime(event_data.split('\t')[1], setting = 'vs')
     timebins_zin = fill_timebins(tweets_zin, event_date)
     timebins_teleurgesteld_tevreden = fill_timebins_doublec(tweets_teleurgesteld, tweets_tevreden, event_date)
-    timebins_tevreden = fill_timebins(tweets_tevreden, event_date)
-    counts_before = return_counts(keys, timebin_zin, ['zin', 'other'])
-    counts_after = return_counts(keys, timebin_teleurgesteld_tevreden, ['teleurgesteld', 'tevreden', 'mixed', 'other'])
+    counts_before = return_counts(keys, timebins_zin, ['zin', 'other'])
+    counts_after = return_counts(keys, timebins_teleurgesteld_tevreden, ['teleurgesteld', 'tevreden', 'mixed', 'other'])
     vals_other = [x[1] for x in counts_before[:21]] + [x[3] for x in counts_after[21:]]
     vals_zin = [x[0] for x in counts_before]
     vals_teleurgesteld = [x[0] for x in counts_after]

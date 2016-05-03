@@ -25,7 +25,7 @@ while i < -5:
     i += step
 
 i = 1
-while i < 116:
+while i < 73:
     for j in range(i, i+step):
         timebins[j] = i+(step-1)
     i += step
@@ -139,11 +139,11 @@ vals_mixed = [x[2] for x in counts_after]
 vals_tevreden = [x[1] for x in counts_after]
 
 plt.bar(keys, vals_zin, 5, color = 'g')
-plt.bar(keys, vals_teleurgesteld, 5, color = 'r', bottom = list(map(sum, zip(vals_zin))))
-plt.bar(keys, vals_mixed, 5, color = 'purple', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld))))
-plt.bar(keys, vals_tevreden, 5, color = 'lightskyblue', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed))))
+plt.bar(keys, vals_teleurgesteld, 5, color = 'r', hatch="/", bottom = list(map(sum, zip(vals_zin))))
+plt.bar(keys, vals_mixed, 5, color = 'purple', hatch="//", bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld))))
+plt.bar(keys, vals_tevreden, 5, color = 'lightskyblue', hatch='\\', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed))))
 #print(len(vals_other), len(vals_tevreden), vals_other, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
-plt.bar(keys, vals_other, 5, color = 'white', bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
+plt.bar(keys, vals_other, 5, color = 'white', hatch="-", bottom = list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden))))
 #plt.plot(keys, list(map(sum, zip(vals_zin, vals_teleurgesteld, vals_mixed, vals_tevreden, vals_other))))
 
 plt.xlabel('Hours in relation to event date')
