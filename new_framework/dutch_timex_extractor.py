@@ -105,7 +105,7 @@ class Dutch_timex_extractor:
     def extract_date(self):
 
         list_patterns_date = (
-            r'(\b|^)(\d{2}-\d{2}-\d{2,4}(\b|$)',
+            r'(\b|^)(\d{2}-\d{2}-\d{2,4})(\b|$)',
             r'(\b|^)(\d{4}-\d{2}-\d{2})(\b|$)',
             r'(\b|^)(\d{2,4}/\d{2})(/\d{2,4})?(\b|$)',
             r'(\b|^)(\d{4}/\d{2}/\d{2})(\b|$)'
@@ -114,8 +114,9 @@ class Dutch_timex_extractor:
         matches = self.match_timex(list_patterns_date)
         ###check
         if len(matches) > 0:
-            datefields = [x for x in matches if x != '']
-            print(self.tweet_text.encode('utf-8'), datefields)
+            for match in matches:
+                datefields = ''.join([x for x in match if x != ''])
+                print(self.tweet_text.encode('utf-8'), datefields)
 
 
 
