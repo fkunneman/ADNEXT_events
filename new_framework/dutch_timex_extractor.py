@@ -3,7 +3,7 @@ import re
 
 class Dutch_timex_extractor:
 
-    def __init__(tweet_text, tweet_date):
+    def __init__(self, tweet_text, tweet_date):
 
         self.tweet_text = tweet_text
         self.tweet_date = tweet_date
@@ -80,13 +80,13 @@ class Dutch_timex_extractor:
             (self.timeunits) + r'($| )', (self.nums) + ' ' + (self.timeunits) + r'( slapen)? tot',
             r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
             r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + (self.timeunits) + 
-            r'( nog)? te gaan'
+            r'( nog)? te gaan'])
 
-        self.list_patterns_month = r'(\b|^)' + (self.nums) + ' ' + (self.months) + r'( |$)' + r'(\d{4})?',
+        self.list_patterns_month = ([r'(\b|^)' + (self.nums) + ' ' + (self.months) + r'( |$)' + r'(\d{4})?'])
             
 
             
-        self.list_patterns_weekdays = r'(volgende week|komende|aankomende|deze) (maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)'
+        self.list_patterns_weekdays = ([r'(volgende week|komende|aankomende|deze) (maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)'
             r' ?(avond|nacht|ochtend|middag)?', r'(overmorgen) ?(avond|nacht|ochtend|middag)?'])
 
         # date_eu = re.compile(r'(\d{1,2})-(\d{1,2})-?(\d{2,4})?')
@@ -94,15 +94,15 @@ class Dutch_timex_extractor:
         # date_vs = re.compile(r'(\d{1,4})/(\d{1,2})/(\d{1,4})')
         # date_vs2 = re.compile(r'(\d{1,2})/(\d{1,2})/(\d{2,4})')
         # date_vs3 = re.compile(r'(\d{1,2})/(\d{1,2})')
-        ns = convert_nums.keys()
-        timeus = convert_timeunit.keys()
-        ms = convert_month.keys()
+        ns = self.number_dict.keys()
+        timeus = self.timeunit_dict.keys()
+        ms = self.month_dict.keys()
 
-    def match_timex(list_patterns):
+    def match_timex(self, list_patterns):
 
         return re.findall('|'.join(list_patterns), self.tweet_text)
 
-    def extract_date():
+    def extract_date(self):
 
         list_patterns_date = (
             r'(\b|^)(\d{2}-\d{2})-\d{2,4})(\b|$)',
@@ -112,7 +112,8 @@ class Dutch_timex_extractor:
         )
         matches = self.match_timex(list_patterns_date)
         ###check
-        print(matches)
+        if len(matches) > 0:
+            print(self.tweet_text.encode('utf-8'), matches)
 
 #         if "date" in nud:
 #             for da in nud["date"]:
