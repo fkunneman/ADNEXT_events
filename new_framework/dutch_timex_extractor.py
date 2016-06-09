@@ -44,7 +44,7 @@ class Dutch_timex_extractor:
             'dertig' : 30,
             'eenendertig' : 31
             }
-        self.numbers = number_dict.keys()
+        self.numbers = self.number_dict.keys()
 
         self.month_dict = {
             'jan' : 1, 'januari' : 1,
