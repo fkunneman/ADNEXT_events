@@ -10,7 +10,10 @@ out_w = open(outfile, 'a', encoding = 'utf-8')
 print('\nUSER INFORMATION:\n\nDit is het programma voor het annoteren van de locatie van events. Succes!\n\n')
 
 with open(eventfile, encoding = 'utf-8') as ef:
-    for line in ef.readlines()[index:]:
+    out = []
+    lines = ef.readlines()
+    while index < len(lines):
+        line = lines[index]
         tokens = line.strip().split('\t')
         date = tokens[0]
         terms = tokens[1]
@@ -26,24 +29,18 @@ with open(eventfile, encoding = 'utf-8') as ef:
         time.sleep(0.25)
         print('\nMOGELIJKE LOCATIE:\n',loc)
         useful = 'NA'
-        while useful == 'NA':
-            print('CORRECTE LOCATIE? \n')
-            inputUser = input()
-            if inputUser == 'j':
-                tokens.append('C')
-                useful = '1'
-            elif inputUser == 'n':
-                print('ANDERE LOCATIE? \n')
-                inputUser = input()
-                if inputUser == 'n':
-                    tokens.append('N')
-                    useful = '1'
-                elif inputUser == 'j':
-                    print('ANDERE LOCATIE? \n')
-                    inputUser = input()
-                    tokens.append(inputUser)
-                    useful = '1'
-            if useful == 'NA':
-                print('Try again, press j or n!\n')
-        out_w.write('\t'.join(tokens) + '\n')
-        index += 1
+        print('geef j / n / [andere locatie] \n')
+        inputUser = input()
+        if inputUser == 'j':
+            tokens.append('C')
+        elif inputUser == 'n':
+            tokens.append('N')
+        else:
+            tokens.append(inputUser)
+        print('Weet je het zeker? (j/n/v)')
+        ipu = input()
+        if ipu == 'j':
+            out_w.write('\t'.join([str(index)] + tokens) + '\n')
+            index += 1
+        elif ipu == 'v':
+            index -= 1
