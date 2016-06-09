@@ -1,6 +1,8 @@
 
 import re
 
+import time_functions
+
 class Dutch_timex_extractor:
 
     def __init__(self, tweet_text, tweet_date):
@@ -147,6 +149,93 @@ class Dutch_timex_extractor:
     #def extract_day():
 
 
+
+
+        #     for da in nud["date"]:
+        #         num_match = da[1]
+        #         if re.search("-",da[0]):
+        #             if "year" in nud:
+        #                 if num_match in [x[1] for x in nud["year"]]:
+        #                     ds = date_eu.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
+        #                         num_match][0]).groups()
+        #                 else:
+        #                     ds = date_eu.search(da[0]).groups()
+        #             else:
+        #                 ds = date_eu.search(da[0]).groups()
+        #             dsi = [int(x) for x in ds if x != None]
+        #             dsis = [x for x in ds if x != None]
+        #             try:
+        #                 if dsi[1] in range(1,13) and \
+        #                     dsi[0] in range(1,32):
+        #                     if ds[2] == None:
+        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1-2
+        #                             y = decide_year(date,dsi[1],dsi[0])
+        #                             if date < datetime.date(y,dsi[1],dsi[0]):
+        #                                 output.append(datetime.date(y,dsi[1],dsi[0]))
+        #                     else:
+        #                         if dsi[2] in range(2010,2020):
+        #                             if date < datetime.date(dsi[2],dsi[1],dsi[0]):
+        #                                 output.append(datetime.date(dsi[2],dsi[1],dsi[0]))
+        #                 elif dsi[0] in range(2010,2020): #2015/03/30
+        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
+        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
+        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
+        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
+        #             except:
+        #                 continue
+        #         elif re.search("/",da[0]):
+        #             if "year" in nud:
+        #                 if num_match in [x[1] for x in nud["year"]]:
+        #                     if [x[0] for x in nud["year"] if x[1] == num_match][0][-1] == "/":
+        #                         ds = date_vs.search([x[0] for x in nud["year"] if x[1] == \
+        #                             num_match][0] + da[0]).groups()
+        #                     else:
+        #                         ds = date_vs.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
+        #                             num_match][0]).groups()
+        #                 else:
+        #                     ds = date_vs3.search(da[0]).groups()
+        #             else:
+        #                 ds = date_vs3.search(da[0]).groups()
+        #             dsi = [int(x) for x in ds if x != None]
+        #             dsis = [x for x in ds if x != None]
+        #             try:
+        #                 if dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03/2015
+        #                     outdate = False
+        #                     if len(dsi) == 3:
+        #                         if len(dsis[2]) == 4:
+        #                             outdate = datetime.date(dsi[2],dsi[1],dsi[0])
+        #                         elif len(dsis[2]) == 2:
+        #                             if dsi[2] in range(10,21):
+        #                                 outdate = datetime.date((dsi[2]+2000),dsi[1],dsi[0])
+        #                     else:
+        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
+        #                             y = decide_year(date,dsi[1],dsi[0])
+        #                             outdate = datetime.date(y,dsi[1],dsi[0])
+        #                     if outdate:
+        #                         if date < outdate:
+        #                             output.append(outdate)
+        #                 elif dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03
+        #                     if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
+        #                         y = decide_year(date,dsi[0],dsi[1])
+        #                         if date < datetime.date(y,dsi[0],dsi[1]):
+        #                             output.append(datetime.date(date.year,dsi[0],dsi[1]))
+        #                 elif dsi[0] in range(2010,2020): #2015/03/30
+        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
+        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
+        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
+        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
+        #             except:
+        #                 continue
+
+
+
+        # elif re.search(r"\d{1,2}-\d{1,2}",unit) or \
+        #     re.search(r"\d{1,2}/\d{1,2}",unit): #date 
+        #     nud["date"].append((unit,i))
+        #     timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
+        # elif re.search(r"-\d{2,4}",unit) or re.search(r"\d{4}-",unit) or re.search(r"\d{4}/",unit) or re.search(r"/\d{2,4}",unit): #year
+        #     nud["year"].append((unit,i))
+>>>>>>> c01129e364dd08ba5c3c369193830b20143433c4
 
 
 
