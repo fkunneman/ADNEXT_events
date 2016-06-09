@@ -16,7 +16,7 @@ for tweet in tweets:
     except:
         print('except:', tokens[0])
         continue
-    text = tokens[1]
+    text = tokens[1].lower()
     dte = dutch_timex_extractor.Dutch_timex_extractor(text, date)
     #dte.extract_date()
     dte.extract_timeunit()    

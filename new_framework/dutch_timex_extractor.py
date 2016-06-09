@@ -127,7 +127,7 @@ class Dutch_timex_extractor:
         matches = self.match_timex(list_patterns_timeunits)
         if len(matches) > 0:
             for match in matches:
-                timeunit_string = ''.join([x for x in match if x != ''])
+                timeunit_string = ' '.join([x for x in match if x != ''])
                 print(self.tweet_text.encode('utf-8'), timeunit_string)
 
             # for match in matches:
@@ -235,7 +235,6 @@ class Dutch_timex_extractor:
         #     timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
         # elif re.search(r"-\d{2,4}",unit) or re.search(r"\d{4}-",unit) or re.search(r"\d{4}/",unit) or re.search(r"/\d{2,4}",unit): #year
         #     nud["year"].append((unit,i))
->>>>>>> c01129e364dd08ba5c3c369193830b20143433c4
 
 
 
