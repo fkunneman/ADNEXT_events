@@ -132,13 +132,13 @@ class Dutch_timex_extractor:
         if len(matches) > 0:
             for match in matches:
                 timeunit_string = ' '.join([x for x in match if x != ''])
-                num = [x for x in match if x in self.numbers][0]
+                num = [x for x in match if x in self.numbers or re.match('\d', x)][0]
                 if num in self.number_dict.keys():
                     num_digit = self.number_dict[num]
                 else:
-                    num_digit = num
+                    num_digit = int(num)
                 timeunit = [x for x in match if x in self.timeunits][0]
-                days = num_digit * self.timeunit_dict(timeunit)
+                days = num_digit * self.timeunit_dict[timeunit]
                 refdate = self.tweet_date + datetime.timedelta(days = days)
                 print(self.tweet_text.encode('utf-8'), timeunit_string, refdate)
 
