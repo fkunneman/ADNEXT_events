@@ -1,5 +1,6 @@
 
 import re
+import datetime
 
 import time_functions
 
@@ -43,6 +44,7 @@ class Dutch_timex_extractor:
             'dertig' : 30,
             'eenendertig' : 31
             }
+        self.numbers = number_dict.keys()
 
         self.month_dict = {
             'jan' : 1, 'januari' : 1,
@@ -58,24 +60,19 @@ class Dutch_timex_extractor:
             'nov' : 11, 'november' : 11,
             'dec' : 12, 'december' : 12
             }
+        self.months = self.month_dict.keys()
         
         self.timeunit_dict = {
             'dagen' : 1, 'daagjes' : 1, 'dag' : 1, 'dagje' : 1, 
             'nachten' : 1, 'nachtjes' : 1, 'nacht' : 1, 'nachtje' : 1, 
             'weken' : 7, 'weekjes' : 7, 'week' : 7, 'weekje' : 7,
             'maanden' : 30, 'maandjes' : 30, 'maand' : 30, 'maandje' : 30}
+        self.timeunits = self.timeunit_dict.keys()
 
         self.weekdays = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag']
         self.specific_days = ['overmorgen', 'morgen']
 
-        self.nums = (r'(\d+|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf|dertien|veertien|'
-            r'vijftien|zestien|zeventien|achtien|negentien|twintig|eenentwintig|tweeentwintig|'
-            r'drieentwintig|vierentwintig|vijfentwintig|zesentwintig|zevenentwintig|achtentwintig|'
-            r'negenentwintig|dertig|eenendertig)')
-        self.months = (r'(jan|januari|feb|februari|mrt|maart|apr|april|mei|jun|juni|jul|juli|aug|augustus|'
-            'sep|september|okt|oktober|nov|november|dec|december)')
-        self.timeunits = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
-            'weekje|maanden|maandjes|maand|maandje)')
+
 
 
 
@@ -117,124 +114,38 @@ class Dutch_timex_extractor:
 
     def extract_timeunit(self):
 
+        nums_re = (r'(\d+|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf|dertien|veertien|'
+            r'vijftien|zestien|zeventien|achtien|negentien|twintig|eenentwintig|tweeentwintig|'
+            r'drieentwintig|vierentwintig|vijfentwintig|zesentwintig|zevenentwintig|achtentwintig|'
+            r'negenentwintig|dertig|eenendertig)')
+        months_re = (r'(jan|januari|feb|februari|mrt|maart|apr|april|mei|jun|juni|jul|juli|aug|augustus|'
+            r'sep|september|okt|oktober|nov|november|dec|december)')
+        timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
+            r'weekje|maanden|maandjes|maand|maandje)')
         list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |'
-            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + 
-            (self.timeunits) + r'($| )', (self.nums) + ' ' + (self.timeunits) + r'( slapen)? tot',
+            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (nums_re) + ' ' + 
+            (timeunits_re) + r'($| )', (nums_re) + ' ' + (timeunits_re) + r'( slapen)? tot',
             r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
-            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + (self.timeunits) + 
+            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (nums_re) + ' ' + (timeunits_re) + 
             r'( nog)? te gaan'])
 
         matches = self.match_timex(list_patterns_timeunits)
         if len(matches) > 0:
             for match in matches:
                 timeunit_string = ' '.join([x for x in match if x != ''])
-                print(self.tweet_text.encode('utf-8'), timeunit_string)
+                num = [x for x in match if x in self.numbers][0]
+                if num in self.number_dict.keys():
+                    num_digit = self.number_dict[num]
+                else:
+                    num_digit = num
+                timeunit = [x for x in match if x in self.timeunits][0]
+                days = num_digit * self.timeunit_dict(timeunit)
+                refdate = self.tweet_date + datetime.timedelta(days = days)
+                print(self.tweet_text.encode('utf-8'), timeunit_string, refdate)
 
-            # for match in matches:
-            #     for t in nud["timeunit"]: 
-            #         num_match = t[1]
-            #         if "num" in nud:
-            #             try:
-            #                 days = t[0] * [x[0] for x in nud["num"] if x[1] == num_match][0]
-            #                 if days > 0:
-            #                     output.append(date + datetime.timedelta(days=days))
-            #             except:
-            #                 continue
-
-
-            #    datestring = ''.join([x for x in match if x != ''])
-            #    refdate = time_functions.return_date(datefields)
-            #    self.dates.append((datestring, refdate))
 
     #def extract_day():
 
-
-
-
-        #     for da in nud["date"]:
-        #         num_match = da[1]
-        #         if re.search("-",da[0]):
-        #             if "year" in nud:
-        #                 if num_match in [x[1] for x in nud["year"]]:
-        #                     ds = date_eu.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
-        #                         num_match][0]).groups()
-        #                 else:
-        #                     ds = date_eu.search(da[0]).groups()
-        #             else:
-        #                 ds = date_eu.search(da[0]).groups()
-        #             dsi = [int(x) for x in ds if x != None]
-        #             dsis = [x for x in ds if x != None]
-        #             try:
-        #                 if dsi[1] in range(1,13) and \
-        #                     dsi[0] in range(1,32):
-        #                     if ds[2] == None:
-        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1-2
-        #                             y = decide_year(date,dsi[1],dsi[0])
-        #                             if date < datetime.date(y,dsi[1],dsi[0]):
-        #                                 output.append(datetime.date(y,dsi[1],dsi[0]))
-        #                     else:
-        #                         if dsi[2] in range(2010,2020):
-        #                             if date < datetime.date(dsi[2],dsi[1],dsi[0]):
-        #                                 output.append(datetime.date(dsi[2],dsi[1],dsi[0]))
-        #                 elif dsi[0] in range(2010,2020): #2015/03/30
-        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
-        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
-        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
-        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
-        #             except:
-        #                 continue
-        #         elif re.search("/",da[0]):
-        #             if "year" in nud:
-        #                 if num_match in [x[1] for x in nud["year"]]:
-        #                     if [x[0] for x in nud["year"] if x[1] == num_match][0][-1] == "/":
-        #                         ds = date_vs.search([x[0] for x in nud["year"] if x[1] == \
-        #                             num_match][0] + da[0]).groups()
-        #                     else:
-        #                         ds = date_vs.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
-        #                             num_match][0]).groups()
-        #                 else:
-        #                     ds = date_vs3.search(da[0]).groups()
-        #             else:
-        #                 ds = date_vs3.search(da[0]).groups()
-        #             dsi = [int(x) for x in ds if x != None]
-        #             dsis = [x for x in ds if x != None]
-        #             try:
-        #                 if dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03/2015
-        #                     outdate = False
-        #                     if len(dsi) == 3:
-        #                         if len(dsis[2]) == 4:
-        #                             outdate = datetime.date(dsi[2],dsi[1],dsi[0])
-        #                         elif len(dsis[2]) == 2:
-        #                             if dsi[2] in range(10,21):
-        #                                 outdate = datetime.date((dsi[2]+2000),dsi[1],dsi[0])
-        #                     else:
-        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
-        #                             y = decide_year(date,dsi[1],dsi[0])
-        #                             outdate = datetime.date(y,dsi[1],dsi[0])
-        #                     if outdate:
-        #                         if date < outdate:
-        #                             output.append(outdate)
-        #                 elif dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03
-        #                     if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
-        #                         y = decide_year(date,dsi[0],dsi[1])
-        #                         if date < datetime.date(y,dsi[0],dsi[1]):
-        #                             output.append(datetime.date(date.year,dsi[0],dsi[1]))
-        #                 elif dsi[0] in range(2010,2020): #2015/03/30
-        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
-        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
-        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
-        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
-        #             except:
-        #                 continue
-
-
-
-        # elif re.search(r"\d{1,2}-\d{1,2}",unit) or \
-        #     re.search(r"\d{1,2}/\d{1,2}",unit): #date 
-        #     nud["date"].append((unit,i))
-        #     timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
-        # elif re.search(r"-\d{2,4}",unit) or re.search(r"\d{4}-",unit) or re.search(r"\d{4}/",unit) or re.search(r"/\d{2,4}",unit): #year
-        #     nud["year"].append((unit,i))
 
 
 
