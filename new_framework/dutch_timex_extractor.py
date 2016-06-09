@@ -72,11 +72,18 @@ class Dutch_timex_extractor:
         self.weekdays = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag']
         self.specific_days = ['overmorgen', 'morgen']
 
+        self.nums_re = (r'(\d+|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf|dertien|veertien|'
+            r'vijftien|zestien|zeventien|achtien|negentien|twintig|eenentwintig|tweeentwintig|'
+            r'drieentwintig|vierentwintig|vijfentwintig|zesentwintig|zevenentwintig|achtentwintig|'
+            r'negenentwintig|dertig|eenendertig)')
+        self.months_re = (r'(jan|januari|feb|februari|mrt|maart|apr|april|mei|jun|juni|jul|juli|aug|augustus|'
+            r'sep|september|okt|oktober|nov|november|dec|december)')
+        self.timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
+            r'weekje|maanden|maandjes|maand|maandje)')
 
 
 
-
-        self.list_patterns_month = ([r'(\b|^)' + (self.nums) + ' ' + (self.months) + r'( |$)' + r'(\d{4})?'])
+        self.list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
             
 
             
@@ -114,19 +121,11 @@ class Dutch_timex_extractor:
 
     def extract_timeunit(self):
 
-        nums_re = (r'(\d+|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf|dertien|veertien|'
-            r'vijftien|zestien|zeventien|achtien|negentien|twintig|eenentwintig|tweeentwintig|'
-            r'drieentwintig|vierentwintig|vijfentwintig|zesentwintig|zevenentwintig|achtentwintig|'
-            r'negenentwintig|dertig|eenendertig)')
-        months_re = (r'(jan|januari|feb|februari|mrt|maart|apr|april|mei|jun|juni|jul|juli|aug|augustus|'
-            r'sep|september|okt|oktober|nov|november|dec|december)')
-        timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
-            r'weekje|maanden|maandjes|maand|maandje)')
         list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |'
-            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (nums_re) + ' ' + 
-            (timeunits_re) + r'($| )', (nums_re) + ' ' + (timeunits_re) + r'( slapen)? tot',
+            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + 
+            (self.timeunits_re) + r'($| )', (self.nums_re) + ' ' + (self.timeunits_re) + r'( slapen)? tot',
             r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
-            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (nums_re) + ' ' + (timeunits_re) + 
+            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + 
             r'( nog)? te gaan'])
 
         matches = self.match_timex(list_patterns_timeunits)
