@@ -105,12 +105,12 @@ class Dutch_timex_extractor:
     def extract_date(self):
 
         list_patterns_date = (
-            r'(\b|^)(\d{2}-\d{2})-\d{2,4})(\b|$)',
+            r'(\b|^)(\d{2}-\d{2}-\d{2,4}(\b|$)',
             r'(\b|^)(\d{4}-\d{2}-\d{2})(\b|$)',
             r'(\b|^)(\d{2,4}/\d{2})(/\d{2,4})?(\b|$)',
-            r'(\b|^)(\d{4}/)(\d{2}/\d{2})(\b|$)'
+            r'(\b|^)(\d{4}/\d{2}/\d{2})(\b|$)'
         )
-        
+
         matches = self.match_timex(list_patterns_date)
         ###check
         if len(matches) > 0:
