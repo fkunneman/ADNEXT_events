@@ -1,6 +1,8 @@
 
 import re
 
+import time_functions
+
 class Dutch_timex_extractor:
 
     def __init__(self, tweet_text, tweet_date):
@@ -116,7 +118,8 @@ class Dutch_timex_extractor:
         if len(matches) > 0:
             for match in matches:
                 datefields = ''.join([x for x in match if x != ''])
-                date = time_functions.return_date(datefields)
+                print(datefields)
+                date = time_functions.return_date(datefields, self.tweet_date)
                 print(self.tweet_text.encode('utf-8'), datefields, date)
 
 
