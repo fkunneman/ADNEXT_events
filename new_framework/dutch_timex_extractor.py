@@ -75,12 +75,7 @@ class Dutch_timex_extractor:
         self.timeunits = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
             'weekje|maanden|maandjes|maand|maandje)')
 
-        self.list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |'
-            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + 
-            (self.timeunits) + r'($| )', (self.nums) + ' ' + (self.timeunits) + r'( slapen)? tot',
-            r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
-            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + (self.timeunits) + 
-            r'( nog)? te gaan'])
+
 
         self.list_patterns_month = ([r'(\b|^)' + (self.nums) + ' ' + (self.months) + r'( |$)' + r'(\d{4})?'])
             
@@ -112,100 +107,46 @@ class Dutch_timex_extractor:
         )
 
         matches = self.match_timex(list_patterns_date)
-        ###check
         if len(matches) > 0:
             for match in matches:
-                datefields = ''.join([x for x in match if x != ''])
-                date = time_functions.return_date(datefields)
-                print(self.tweet_text.encode('utf-8'), datefields, date)
+                datestring = ''.join([x for x in match if x != ''])
+                refdate = time_functions.return_date(datefields)
+                self.dates.append((datestring, refdate))
+
+    def extract_timeunit(self):
+
+        list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |'
+            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + 
+            (self.timeunits) + r'($| )', (self.nums) + ' ' + (self.timeunits) + r'( slapen)? tot',
+            r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
+            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums) + ' ' + (self.timeunits) + 
+            r'( nog)? te gaan'])
+
+        matches = self.match_timex(list_patterns_timeunits)
+        if len(matches) > 0:
+            for match in matches:
+                timeunit_string = ''.join([x for x in match if x != ''])
+                print(self.tweet_text.encode('utf-8'), timeunit_string)
+
+            # for match in matches:
+            #     for t in nud["timeunit"]: 
+            #         num_match = t[1]
+            #         if "num" in nud:
+            #             try:
+            #                 days = t[0] * [x[0] for x in nud["num"] if x[1] == num_match][0]
+            #                 if days > 0:
+            #                     output.append(date + datetime.timedelta(days=days))
+            #             except:
+            #                 continue
 
 
+            #    datestring = ''.join([x for x in match if x != ''])
+            #    refdate = time_functions.return_date(datefields)
+            #    self.dates.append((datestring, refdate))
+
+    #def extract_day():
 
 
-        #     for da in nud["date"]:
-        #         num_match = da[1]
-        #         if re.search("-",da[0]):
-        #             if "year" in nud:
-        #                 if num_match in [x[1] for x in nud["year"]]:
-        #                     ds = date_eu.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
-        #                         num_match][0]).groups()
-        #                 else:
-        #                     ds = date_eu.search(da[0]).groups()
-        #             else:
-        #                 ds = date_eu.search(da[0]).groups()
-        #             dsi = [int(x) for x in ds if x != None]
-        #             dsis = [x for x in ds if x != None]
-        #             try:
-        #                 if dsi[1] in range(1,13) and \
-        #                     dsi[0] in range(1,32):
-        #                     if ds[2] == None:
-        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1-2
-        #                             y = decide_year(date,dsi[1],dsi[0])
-        #                             if date < datetime.date(y,dsi[1],dsi[0]):
-        #                                 output.append(datetime.date(y,dsi[1],dsi[0]))
-        #                     else:
-        #                         if dsi[2] in range(2010,2020):
-        #                             if date < datetime.date(dsi[2],dsi[1],dsi[0]):
-        #                                 output.append(datetime.date(dsi[2],dsi[1],dsi[0]))
-        #                 elif dsi[0] in range(2010,2020): #2015/03/30
-        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
-        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
-        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
-        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
-        #             except:
-        #                 continue
-        #         elif re.search("/",da[0]):
-        #             if "year" in nud:
-        #                 if num_match in [x[1] for x in nud["year"]]:
-        #                     if [x[0] for x in nud["year"] if x[1] == num_match][0][-1] == "/":
-        #                         ds = date_vs.search([x[0] for x in nud["year"] if x[1] == \
-        #                             num_match][0] + da[0]).groups()
-        #                     else:
-        #                         ds = date_vs.search(da[0] + [x[0] for x in nud["year"] if x[1] == \
-        #                             num_match][0]).groups()
-        #                 else:
-        #                     ds = date_vs3.search(da[0]).groups()
-        #             else:
-        #                 ds = date_vs3.search(da[0]).groups()
-        #             dsi = [int(x) for x in ds if x != None]
-        #             dsis = [x for x in ds if x != None]
-        #             try:
-        #                 if dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03/2015
-        #                     outdate = False
-        #                     if len(dsi) == 3:
-        #                         if len(dsis[2]) == 4:
-        #                             outdate = datetime.date(dsi[2],dsi[1],dsi[0])
-        #                         elif len(dsis[2]) == 2:
-        #                             if dsi[2] in range(10,21):
-        #                                 outdate = datetime.date((dsi[2]+2000),dsi[1],dsi[0])
-        #                     else:
-        #                         if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
-        #                             y = decide_year(date,dsi[1],dsi[0])
-        #                             outdate = datetime.date(y,dsi[1],dsi[0])
-        #                     if outdate:
-        #                         if date < outdate:
-        #                             output.append(outdate)
-        #                 elif dsi[0] in range(1,13) and dsi[1] in range(1,32): #30/03
-        #                     if not (len(dsis[0]) == 1 and len(dsis[1]) == 1): #avoid patterns like 1/2
-        #                         y = decide_year(date,dsi[0],dsi[1])
-        #                         if date < datetime.date(y,dsi[0],dsi[1]):
-        #                             output.append(datetime.date(date.year,dsi[0],dsi[1]))
-        #                 elif dsi[0] in range(2010,2020): #2015/03/30
-        #                     if dsi[1] in range(1,13) and dsi[2] in range(1,32):
-        #                         if not (len(dsis[1]) == 1 and len(dsis[2]) == 1): #avoid patterns like 1/2
-        #                             if date < datetime.date(dsi[0],dsi[1],dsi[2]):
-        #                                 output.append(datetime.date(dsi[0],dsi[1],dsi[2]))
-        #             except:
-        #                 continue
-
-
-
-        # elif re.search(r"\d{1,2}-\d{1,2}",unit) or \
-        #     re.search(r"\d{1,2}/\d{1,2}",unit): #date 
-        #     nud["date"].append((unit,i))
-        #     timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
-        # elif re.search(r"-\d{2,4}",unit) or re.search(r"\d{4}-",unit) or re.search(r"\d{4}/",unit) or re.search(r"/\d{2,4}",unit): #year
-        #     nud["year"].append((unit,i))
 
 
 
@@ -258,18 +199,7 @@ class Dutch_timex_extractor:
 #             tp = ', '.join(timephrases)
 #             output = [re.split(regexPattern, tweet_text),tp]
 
-#         #process extracted
-#         if "timeunit" in nud:
-#             if not "month" in nud and not "date" in nud: #overrule by more specific time indication
-#                 for t in nud["timeunit"]: 
-#                     num_match = t[1]
-#                     if "num" in nud:
-#                         try:
-#                             days = t[0] * [x[0] for x in nud["num"] if x[1] == num_match][0]
-#                             if days > 0:
-#                                 output.append(date + datetime.timedelta(days=days))
-#                         except:
-#                             continue
+
 #         if "month" in nud:
 #             for t in nud["month"]:
 #                 num_match = t[1]
@@ -318,9 +248,4 @@ class Dutch_timex_extractor:
 #         else:
 #             return output
 
-# def extract_timeunit():
 
-
-# def extract_day():
-
-# def extract_date():
