@@ -12,53 +12,53 @@ class Dutch_timex_extractor:
         self.tweet_date = tweet_date
 
         self.number_dict = {
-            'een' : 1,
-            'twee' : 2,
-            'drie' : 3,
-            'vier' : 4,
-            'vijf' : 5,
-            'zes' : 6,
-            'zeven' : 7,
-            'acht' : 8,
-            'negen' : 9,
-            'tien' : 10,
-            'elf' : 11,
-            'twaalf' : 12,
-            'dertien' : 13,
-            'veertien' : 14,
-            'vijftien' : 15,
-            'zestien' : 16,
-            'zeventien' : 17,
-            'achtien' : 18,
-            'negentien' : 19,
-            'twintig' : 20,
-            'eenentwintig' : 21,
-            'tweeentwintig' : 22,
-            'drieentwintig' : 23,
-            'vierentwintig' : 24,
-            'vijfentwintig' : 25,
-            'zesentwintig' : 26,
-            'zevenentwintig' : 27,
-            'achtentwintig' : 28,
-            'negenentwintig' : 29,
-            'dertig' : 30,
-            'eenendertig' : 31
+            'een'               : 1,
+            'twee'              : 2,
+            'drie'              : 3,
+            'vier'              : 4,
+            'vijf'              : 5,
+            'zes'               : 6,
+            'zeven'             : 7,
+            'acht'              : 8,
+            'negen'             : 9,
+            'tien'              : 10,
+            'elf'               : 11,
+            'twaalf'            : 12,
+            'dertien'           : 13,
+            'veertien'          : 14,
+            'vijftien'          : 15,
+            'zestien'           : 16,
+            'zeventien'         : 17,
+            'achtien'           : 18,
+            'negentien'         : 19,
+            'twintig'           : 20,
+            'eenentwintig'      : 21,
+            'tweeentwintig'     : 22,
+            'drieentwintig'     : 23,
+            'vierentwintig'     : 24,
+            'vijfentwintig'     : 25,
+            'zesentwintig'      : 26,
+            'zevenentwintig'    : 27,
+            'achtentwintig'     : 28,
+            'negenentwintig'    : 29,
+            'dertig'            : 30,
+            'eenendertig'       : 31
             }
         self.numbers = self.number_dict.keys()
 
         self.month_dict = {
-            'jan' : 1, 'januari' : 1,
-            'feb' : 2, 'februari' : 2,
-            'mrt' : 3, 'maart' : 3,
-            'apr' : 4, 'april' : 4,
+            'jan' : 1, 'januari'    : 1,
+            'feb' : 2, 'februari'   : 2,
+            'mrt' : 3, 'maart'      : 3,
+            'apr' : 4, 'april'      : 4,
             'mei' : 5, 
-            'jun' : 6, 'juni' : 6,
-            'jul' : 7, 'juli' : 7, 
-            'aug' : 8, 'augustus' : 8,
-            'sep' : 9, 'september' : 9,
-            'okt' : 10, 'oktober' : 10,
-            'nov' : 11, 'november' : 11,
-            'dec' : 12, 'december' : 12
+            'jun' : 6, 'juni'       : 6,
+            'jul' : 7, 'juli'       : 7, 
+            'aug' : 8, 'augustus'   : 8,
+            'sep' : 9, 'september'  : 9,
+            'okt' : 10, 'oktober'   : 10,
+            'nov' : 11, 'november'  : 11,
+            'dec' : 12, 'december'  : 12
             }
         self.months = self.month_dict.keys()
         
@@ -80,25 +80,7 @@ class Dutch_timex_extractor:
             r'sep|september|okt|oktober|nov|november|dec|december)')
         self.timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
             r'weekje|maanden|maandjes|maand|maandje)')
-
-
-
-        self.list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
             
-
-            
-        self.list_patterns_weekdays = ([r'(volgende week|komende|aankomende|deze) (maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)'
-            r' ?(avond|nacht|ochtend|middag)?', r'(overmorgen) ?(avond|nacht|ochtend|middag)?'])
-
-        # date_eu = re.compile(r'(\d{1,2})-(\d{1,2})-?(\d{2,4})?')
-        # date_eu2 = re.compile(r'(\d{1,4})-(\d{1,2})-?(\d{1,4})?')
-        # date_vs = re.compile(r'(\d{1,4})/(\d{1,2})/(\d{1,4})')
-        # date_vs2 = re.compile(r'(\d{1,2})/(\d{1,2})/(\d{2,4})')
-        # date_vs3 = re.compile(r'(\d{1,2})/(\d{1,2})')
-        ns = self.number_dict.keys()
-        timeus = self.timeunit_dict.keys()
-        ms = self.month_dict.keys()
-
     def match_timex(self, list_patterns):
 
         return re.findall('|'.join(list_patterns), self.tweet_text)
@@ -121,12 +103,13 @@ class Dutch_timex_extractor:
 
     def extract_timeunit(self):
 
-        list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |'
-            r'pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + 
-            (self.timeunits_re) + r'($| )', (self.nums_re) + ' ' + (self.timeunits_re) + r'( slapen)? tot',
-            r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |'
-            r'krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + 
-            r'( nog)? te gaan'])
+        list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |'
+            r'maar |slechts |pakweg |ruim |krap |(maar )?een kleine |'
+            r'(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + 
+            r'($| )', (self.nums_re) + ' ' + (self.timeunits_re) + r'( slapen)? tot',
+            r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |'
+            r'ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + 
+            ' ' + (self.timeunits_re) + r'( nog)? te gaan'])
 
         matches = self.match_timex(list_patterns_timeunits)
         if len(matches) > 0:
@@ -140,13 +123,47 @@ class Dutch_timex_extractor:
                 timeunit = [x for x in match if x in self.timeunits][0]
                 days = num_digit * self.timeunit_dict[timeunit]
                 refdate = self.tweet_date + datetime.timedelta(days = days)
-                print(self.tweet_text.encode('utf-8'), timeunit_string, refdate)
+                self.dates.append((timeunit_string, refdate))
 
 
-    #def extract_day():
+    def extract_day(self):
 
+        list_patterns_days = ([r'(volgende week|komende|aankomende|deze) '
+            r'(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag) ?'
+            r'(avond|nacht|ochtend|middag)?', r'(morgen|overmorgen) ?(avond|nacht|ochtend|middag)?'])
 
+        matches = self.match_timex(list_patterns_timeunits)
 
+        if len(matches) > 0:
+            tweet_weekday = self.tweet_date.weekday()
+            print(matches)
+            # for match in matches:
+
+        #         num_match = w[1]
+        #         ref_weekday=weekdays.index(w[0])
+        #         if num_match in [x[1] for x in nud["nweek"]]:
+        #             add = 7
+        #         else:
+        #             add = 0
+        #         if not ref_weekday == tweet_weekday and not num_match in [x[1] for x in nud["nweek"]]: 
+        #             if tweet_weekday < ref_weekday:
+        #                 days_ahead = ref_weekday - tweet_weekday + add
+        #             else:
+        #                 days_ahead = ref_weekday + (7-tweet_weekday) + add
+        #             output.append(date + datetime.timedelta(days=days_ahead))
+        # if "sday" in nud:
+        #     for s in nud["sday"]:
+        #         num_match = s[1] 
+        #         timephrase = " ".join([x for x in matches[num_match] if len(x) > 0])
+        #         u = s[0]
+        #         if u == "overmorgen":
+        #             output.append(date + datetime.timedelta(days=2))
+        #         elif u == 'morgen':
+        #             output.append(date + datetime.timedelta(days=1))
+
+    def extract_month(self):
+
+        list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
 
 #             timephrases = []
 #             matches = re.findall('|'.join(list_patterns), tweet_text)
@@ -216,31 +233,7 @@ class Dutch_timex_extractor:
 #                 except:
 #                     continue
 
-#         if "weekday" in nud:
-#             if not "date" in nud and not "month" in nud and not "timeunit" in nud: # overrule by more specific indication
-#                 tweet_weekday=date.weekday()
-#                 for w in nud["weekday"]:
-#                     num_match = w[1]
-#                     ref_weekday=weekdays.index(w[0])
-#                     if num_match in [x[1] for x in nud["nweek"]]:
-#                         add = 7
-#                     else:
-#                         add = 0
-#                     if not ref_weekday == tweet_weekday and not num_match in [x[1] for x in nud["nweek"]]: 
-#                         if tweet_weekday < ref_weekday:
-#                             days_ahead = ref_weekday - tweet_weekday + add
-#                         else:
-#                             days_ahead = ref_weekday + (7-tweet_weekday) + add
-#                         output.append(date + datetime.timedelta(days=days_ahead))
-#         if "sday" in nud:
-#             for s in nud["sday"]:
-#                 num_match = s[1] 
-#                 timephrase = " ".join([x for x in matches[num_match] if len(x) > 0])
-#                 u = s[0]
-#                 if u == "overmorgen":
-#                     output.append(date + datetime.timedelta(days=2))
-#                 elif u == 'morgen':
-#                     output.append(date + datetime.timedelta(days=1))
+
 #         if len(nud.keys()) == 0:
 #             return False
 #         else:
