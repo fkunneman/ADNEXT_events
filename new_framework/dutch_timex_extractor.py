@@ -110,6 +110,10 @@ class Dutch_timex_extractor:
         timestring = joinstr.join([x for x in match if x.strip() != ''])
         return timestring
 
+    def filter_future_refdates(self):
+        future_refdates = [refdate for refdate in self.refdates if refdate[1] > self.tweet_date] 
+        self.refdates = future_refdates
+
     def extract_date(self):
 
         list_patterns_date = (
@@ -125,9 +129,10 @@ class Dutch_timex_extractor:
                 datestring = self.match2timestring(match,'')
                 try:
                     refdate = time_functions.return_date(datestring)
+                    if refdate:
+                        self.refdates.append((datestring,refdate))
                 except ValueError: # given datestring is inexistable
                     continue
-                self.refdates.append((datestring,refdate))
 
     def extract_month(self):
 
@@ -150,13 +155,12 @@ class Dutch_timex_extractor:
                     else:
                         year = self.tweet_date.year+1
                 try:
-                    refdate = datetime.date(year,month,day)
+                    refdate = datetime.datetime(year,month,day,0,0,0)
                 except ValueError: # given date is inexistent
                     continue
                 self.refdates.append((timestring,refdate))
 
     def extract_timeunit(self):
-
         list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |'
             r'maar |slechts |pakweg |ruim |krap |(maar )?een kleine |'
             r'(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + 
