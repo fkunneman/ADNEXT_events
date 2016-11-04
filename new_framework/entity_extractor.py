@@ -11,7 +11,7 @@ class EntityExtrator:
         ngrams_string = [' '.join(ngram) for ngram in ngrams]
         return ngrams_string
 
-    def score_commonness_pattern(self, pattern):
+    def score_commonness_pattern(self,pattern):
         commonness_score = self.commonness.dmodel[pattern]
         return commonness_score
 
