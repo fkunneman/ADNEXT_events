@@ -19,4 +19,5 @@ for tweet in tweets:
     text = tokens[1].lower()
     dte = dutch_timex_extractor.Dutch_timex_extractor(text, date)
     #dte.extract_date()
-    dte.extract_timeunit()    
+#    dte.extract_timeunit()    
+    dte.extract_day()
