@@ -11,6 +11,8 @@ class Dutch_timex_extractor:
         self.tweet_text = tweet_text
         self.tweet_date = tweet_date
 
+        self.refdates = []
+
         self.number_dict = {
             'een'               : 1,
             'twee'              : 2,
@@ -70,7 +72,6 @@ class Dutch_timex_extractor:
         self.timeunits = self.timeunit_dict.keys()
 
         self.weekdays = ['maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag', 'zondag']
-        self.specific_days = ['overmorgen', 'morgen']
 
         self.nums_re = (r'(\d+|een|twee|drie|vier|vijf|zes|zeven|acht|negen|tien|elf|twaalf|dertien|veertien|'
             r'vijftien|zestien|zeventien|achtien|negentien|twintig|eenentwintig|tweeentwintig|'
@@ -80,10 +81,34 @@ class Dutch_timex_extractor:
             r'sep|september|okt|oktober|nov|november|dec|december)')
         self.timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
             r'weekje|maanden|maandjes|maand|maandje)')
-            
+
+    def extract_refdates(self, match_date=True, match_month=True, match_timeunit=True, match_day=True):
+        # perform chosen information extraction
+        if match_date:
+            self.extract_date()
+        if match_month:
+            self.extract_month()
+        if match_timeunit:
+            self.extract_timeunit()
+        if match_day:
+            self.extract_day()
+
+    def return_refdates(self):
+        # clean up, sort and return reference dates 
+        if len(self.refdates) > 0:
+            unique_refdates = list(set(self.refdates))
+            sorted_refdates = sorted(unique_refdates)
+            return sorted_refdates
+        else:
+            return False 
+
     def match_timex(self, list_patterns):
 
         return re.findall('|'.join(list_patterns), self.tweet_text)
+
+    def match2timestring(self, match, joinstr):
+        timestring = joinstr.join([x for x in match if x.strip() != ''])
+        return timestring
 
     def extract_date(self):
 
@@ -97,9 +122,38 @@ class Dutch_timex_extractor:
         matches = self.match_timex(list_patterns_date)
         if len(matches) > 0:
             for match in matches:
-                datestring = ''.join([x for x in match if x != ''])
-                refdate = time_functions.return_date(datefields)
-                self.dates.append((datestring, refdate))
+                datestring = self.match2timestring(match,'')
+                try:
+                    refdate = time_functions.return_date(datestring)
+                except ValueError: # given datestring is inexistable
+                    continue
+                self.refdates.append((datestring,refdate))
+
+    def extract_month(self):
+
+        list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
+
+        matches = self.match_timex(list_patterns_month)
+        if len(matches) > 0:
+            for match in matches:
+                timestring = self.match2timestring(match,' ')
+                try:
+                    day = int(match[1])
+                except ValueError: # day is in written form
+                    day = self.number_dict[match[1]]
+                month = self.month_dict[match[2]]
+                if match[-1] != '': # year information is included
+                    year = int(match[4])
+                else:
+                    if month >= self.tweet_date.month:
+                        year = self.tweet_date.year
+                    else:
+                        year = self.tweet_date.year+1
+                try:
+                    refdate = datetime.date(year,month,day)
+                except ValueError: # given date is inexistent
+                    continue
+                self.refdates.append((timestring,refdate))
 
     def extract_timeunit(self):
 
@@ -114,7 +168,7 @@ class Dutch_timex_extractor:
         matches = self.match_timex(list_patterns_timeunits)
         if len(matches) > 0:
             for match in matches:
-                timeunit_string = ' '.join([x for x in match if x != ''])
+                timestring = self.match2timestring(match,' ')
                 num = [x for x in match if x in self.numbers or re.match('\d', x)][0]
                 if num in self.number_dict.keys():
                     num_digit = self.number_dict[num]
@@ -123,120 +177,39 @@ class Dutch_timex_extractor:
                 timeunit = [x for x in match if x in self.timeunits][0]
                 days = num_digit * self.timeunit_dict[timeunit]
                 refdate = self.tweet_date + datetime.timedelta(days = days)
-                self.dates.append((timeunit_string, refdate))
-
+                self.refdates.append((timestring, refdate))
 
     def extract_day(self):
 
+        #list_patterns_days = ([r'(volgende week|komende|aankomende|deze) '
+        #    r'(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag) ?'
+        #    r'(avond|nacht|ochtend|middag)?', r'(morgen|overmorgen) ?(avond|nacht|ochtend|middag)?'])
+
         list_patterns_days = ([r'(volgende week|komende|aankomende|deze) '
             r'(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag) ?'
-            r'(avond|nacht|ochtend|middag)?', r'(morgen|overmorgen) ?(avond|nacht|ochtend|middag)?'])
+            r'(avond|nacht|ochtend|middag)?', r'overmorgen ?(avond|nacht|ochtend|middag)?'])
 
-        matches = self.match_timex(list_patterns_timeunits)
+        matches = self.match_timex(list_patterns_days)
 
         if len(matches) > 0:
             tweet_weekday = self.tweet_date.weekday()
-            print(matches)
-            # for match in matches:
-
-        #         num_match = w[1]
-        #         ref_weekday=weekdays.index(w[0])
-        #         if num_match in [x[1] for x in nud["nweek"]]:
-        #             add = 7
-        #         else:
-        #             add = 0
-        #         if not ref_weekday == tweet_weekday and not num_match in [x[1] for x in nud["nweek"]]: 
-        #             if tweet_weekday < ref_weekday:
-        #                 days_ahead = ref_weekday - tweet_weekday + add
-        #             else:
-        #                 days_ahead = ref_weekday + (7-tweet_weekday) + add
-        #             output.append(date + datetime.timedelta(days=days_ahead))
-        # if "sday" in nud:
-        #     for s in nud["sday"]:
-        #         num_match = s[1] 
-        #         timephrase = " ".join([x for x in matches[num_match] if len(x) > 0])
-        #         u = s[0]
-        #         if u == "overmorgen":
-        #             output.append(date + datetime.timedelta(days=2))
-        #         elif u == 'morgen':
-        #             output.append(date + datetime.timedelta(days=1))
-
-    def extract_month(self):
-
-        list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
-
-#             timephrases = []
-#             matches = re.findall('|'.join(list_patterns), tweet_text)
-#             nud = defaultdict(list)
-
-#             # for all matches
-#             for i,units in enumerate(matches):
-
-#                 # select timephrases
-#                 timephrases.append(" ".join([x for x in units if len(x) > 0 and not x == " "]))
-                
-#                 # for all timephrase parts
-#                 for unit in units:
-
-#                     # classify type
-#                     if unit in ns: # number
-#                         nud["num"].append((convert_nums[unit],i))
-#                     elif unit in timeus: # time unit
-#                         if not "weekday" in nud:
-#                             nud["timeunit"].append((convert_timeunit[unit],i))
-#                     elif unit in ms: # month
-#                         nud["month"].append((convert_month[unit],i))
-#                     elif re.search(r"\d{1,2}-\d{1,2}",unit) or \
-#                         re.search(r"\d{1,2}/\d{1,2}",unit): #date 
-#                         nud["date"].append((unit,i))
-#                         timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
-#                     elif re.search(r"-\d{2,4}",unit) or re.search(r"\d{4}-",unit) or re.search(r"\d{4}/",unit) or re.search(r"/\d{2,4}",unit): #year
-#                         nud["year"].append((unit,i))
-#                     elif re.match(r"\d+",unit): #digit
-#                         if int(unit) in range(2010,2020):
-#                             nud["year"].append((int(unit),i)) #year
-#                         elif "num" in nud: 
-#                             if int(unit) in range(1,13): # month
-#                                 nud["month"].append((int(unit),i))
-#                             nud["num"].append((int(unit),i)) # number
-#                         else:
-#                             nud["num"].append((int(unit),i)) # number
-#                     elif unit in weekdays:
-#                         nud["weekday"].append((unit,i)) #weekday
-#                         if re.search(unit + r"(avond|middag|ochtend|nacht)",tweet_text):
-#                             timephrases[i] = "".join([x for x in units if len(x) > 0 and not x == " "])
-#                     elif unit in spec_days:
-#                         nud["sday"].append((unit,i)) # overmorgen / morgen
-#                     elif unit == "volgende week":
-#                         nud["nweek"].append((unit,i)) # week
-#                 timephrases[i] = timephrases[i].replace("  "," ")
-#             regexPattern = '|'.join(map(re.escape, timephrases))
-#             tp = ', '.join(timephrases)
-#             output = [re.split(regexPattern, tweet_text),tp]
-
-
-#         if "month" in nud:
-#             for t in nud["month"]:
-#                 num_match = t[1]
-#                 m = t[0]
-#                 try:
-#                     d = [x[0] for x in nud["num"] if x[1] == num_match][0]
-#                     if "year" in nud:
-#                         if num_match in [x[1] for x in nud["year"]]:
-#                             y = [x[0] for x in nud["year"] if x[1] == num_match][0]
-#                         else:
-#                             y = decide_year(date,m,d)
-#                     else:
-#                         y = decide_year(date,m,d)
-#                     if date < datetime.date(y,m,d):
-#                         output.append(datetime.date(y,m,d))
-#                 except:
-#                     continue
-
-
-#         if len(nud.keys()) == 0:
-#             return False
-#         else:
-#             return output
-
-
+            for match in matches:
+                if len([field for field in match if field != '']) > 0:
+                    timestring = self.match2timestring(match,' ')
+                    if 'morgen' in match:
+                        days_ahead = 1
+                    elif 'overmorgen' in match:
+                        days_ahead = 2
+                    else: # weekdays 
+                        tweet_weekday = self.tweet_date.weekday()
+                        match_weekday = [self.weekdays.index(field) for field in match if field in self.weekdays][0]
+                        if 'volgende week' in match:
+                            bonus = 7
+                        else:
+                            bonus = 0
+                        if tweet_weekday <= match_weekday:
+                            days_ahead = match_weekday - tweet_weekday + bonus
+                        else:
+                            days_ahead = match_weekday + (7-tweet_weekday) + bonus
+                    refdate = self.tweet_date + datetime.timedelta(days = days_ahead)
+                    self.refdates.append((timestring, refdate))

@@ -1,0 +1,20 @@
+
+import colibricore
+
+class Commonness:
+
+    def __init__(self):
+        self.classencoder = colibricore.ClassEncoder()
+        self.dmodel = colibricore.PatternDict_float()
+
+    def set_classencoder(self, commonness_txt, commonness_cls, commonness_corpus):
+        self.classencoder.build(commonness_txt)
+        self.classencoder.encodefile(commonness_cls, commonness_corpus)
+        
+    def set_dmodel(self, ngrams_score):
+        with open(ngrams_score,'r',encoding='utf-8') as txt_in:
+            for line in txt_in.readlines():
+                tokens = line.strip().split('\t')
+                pattern = self.classencoder.buildpattern(tokens[0])
+                self.dmodel[pattern] = float(tokens[3])
+            txt_in.close()
