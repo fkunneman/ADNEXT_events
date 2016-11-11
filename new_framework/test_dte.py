@@ -10,14 +10,17 @@ import ucto
 
 from tweet import Tweet
 
-test_tweets = sys.argv[1]
-commonness_txt = sys.argv[2]
-commonness_cls = sys.argv[3]
-commonness_corpus = sys.argv[4]
-ngrams_score = sys.argv[5]
+commonness_txt = sys.argv[1]
+commonness_cls = sys.argv[2]
+commonness_corpus = sys.argv[3]
+ngrams_score = sys.argv[4]
+test_tweets = sys.argv[5:]
 
-with open(test_tweets, 'r', encoding = 'utf-8') as test_in:
-    tweets = test_in.readlines()
+tweets = []
+for ttf in test_tweets:
+    with open(ttf, 'r', encoding = 'utf-8') as test_in:
+        tweets.extend(test_in.readlines()[1:])
+print('Imported', len(tweets), 'tweets')
 
 tokenizer = ucto.Tokenizer('/vol/customopt/lamachine/etc/ucto/tokconfig-nl-twitter')
 
@@ -27,7 +30,7 @@ cs.set_classencoder(commonness_txt, commonness_cls, commonness_corpus)
 cs.set_dmodel(ngrams_score)
 
 tweetsobjs = []
-for tweet in tweets[1:]:
+for tweet in tweets:
     tokens = tweet.strip().split('\t')
     try:
         date = time_functions.return_datetime(tokens[2], setting = 'vs')
