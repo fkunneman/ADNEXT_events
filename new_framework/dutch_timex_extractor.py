@@ -87,7 +87,10 @@ class Dutch_timex_extractor:
         if match_date:
             self.extract_date()
         if match_month:
-            self.extract_month()
+            try:
+                self.extract_month()
+            except OverflowError:
+                print('overflow',self.tweet_text.encode('utf-8'))
         if match_timeunit:
             self.extract_timeunit()
         if match_day:
