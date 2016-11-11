@@ -79,7 +79,7 @@ class EventRanker:
                     date_entity_event[pair] = event
                     self.events.append(event)
 
-    def prune_events(self,minimum_event_mentions)
+    def prune_events(self,minimum_event_mentions):
         self.events = [event for event in self.events if event.mentions >= minimum_event_mentions]
 
     def score_event(self,event,tweet_count):
