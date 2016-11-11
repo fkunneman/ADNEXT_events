@@ -3,8 +3,11 @@
 class EntityExtractor:
 
     def __init__(self, commonness):
-        self.commonness = commonness
         self.entities = []
+        self.commonness = False
+
+    def set_commonness(self, commonness):
+        self.commonness = commonness
 
     def extract_ngrams(self,tokens,n):
         ngrams = list(zip(*[tokens[i:] for i in range(n)]))
@@ -12,7 +15,11 @@ class EntityExtractor:
         return ngrams_string
 
     def score_commonness_pattern(self,pattern):
-        commonness_score = self.commonness.dmodel[pattern]
+        try:
+            commonness_score = self.commonness.dmodel[pattern]
+        except:
+            print('Commonness models not set, exiting program...')
+            exit()
         return commonness_score
 
     def match_entities_ngram(self,ngram):
