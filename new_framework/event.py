@@ -1,4 +1,6 @@
 
+import json
+
 class Event:
     """
     Container for event class
@@ -15,7 +17,7 @@ class Event:
         self.set_tweets(eventdict['tweets'])
 
     def return_dict(self):
-        return self.dict
+        return json.dumps(self.dict)
 
     def set_date(self,date):
         self.date = date

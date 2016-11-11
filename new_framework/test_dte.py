@@ -1,14 +1,17 @@
 
 import sys
+import json
+
+import ucto
 
 import time_functions
 import dutch_timex_extractor
 import commonness
 import helpers
 import entity_extractor
-import ucto
-
 from tweet import Tweet
+from event_ranker import EventRanker
+
 
 test_tweets = sys.argv[1]
 commonness_txt = sys.argv[2]
@@ -26,7 +29,7 @@ cs = commonness.Commonness()
 cs.set_classencoder(commonness_txt, commonness_cls, commonness_corpus)
 cs.set_dmodel(ngrams_score)
 
-tweetsobjs = []
+tweetobjs = []
 for tweet in tweets[1:]:
     tokens = tweet.strip().split('\t')
     try:
@@ -56,5 +59,7 @@ for tweet in tweets[1:]:
 #    print(', '.join([x[0] for x in ee.entities]).encode('utf-8'))
     tweetobjs.append(tweetobj)
 
-
-
+er = EventRanker(tweetobjs)
+events = er.extract_events()
+for i,event in events[:100]:
+    print(i, '\n', event.return_dict().encode('utf-8'))
