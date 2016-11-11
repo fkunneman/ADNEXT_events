@@ -3,7 +3,7 @@ from collections import Counter
 from itertools import product
 import math
 
-from event import Event
+from classes.event import Event
 
 class EventRanker:
 
@@ -39,7 +39,7 @@ class EventRanker:
         g2 = 0
         combis = self.pair_lists(['+','-'],['+','-'])
         for combi in combis:
-            observed = self.caclulate_observed(combi,total_count,count_v1,count_v2,observed_v1_v2)
+            observed = self.calculate_observed(combi,total_count,count_v1,count_v2,observed_v1_v2)
             c1 = count_v1 if combi[0] == '+' else total_count-count_v1
             c2 = count_v2 if combi[0] == '+' else total_count-count_v2
             expected = self.calculate_expected(total_count,c1,c2)
@@ -59,31 +59,47 @@ class EventRanker:
         
     def make_counts(self):
         for tweet in self.tweets:
-            self.count_dates(tweet)
+            self.count_refdates(tweet)
             self.count_entities(tweet)
 
     def generate_candidate_events(self):
         # Find out all possible pairs of dates and entities
         all_date_entity_pairs = self.pair_lists(self.date_counts.keys(),self.entity_counts.keys())
-        date_entity_event = list2unidict(all_date_entity_pairs,False)
+        date_entity_event = self.list2unidict(all_date_entity_pairs,False)
         for tweet in self.tweets:
-            date_entity_pairs = self.pair_lists(tweet.dates,tweet.entities)
+            date_entity_pairs = self.pair_lists(tweet.refdates,tweet.entities)
             for pair in date_entity_pairs:
                 if date_entity_event[pair]: # event already exists, add tweets and counts
                     event = date_entity_event[pair]
-                    event.mentions += 1
-                    event.tweets.append(tweet)
+                    event.add_mention()
+                    event.add_tweet(tweet)
                 else: # new event should be made
-                    eventdict = {'date':pair[0], 'entities':[pair[1]], 'score':False, 'tweets':[tweet]}
-                    event = event.Event(eventdict)
+                    event = Event()
+                    event.set_datetime(pair[0])
+                    event.add_entities([pair[1]])
+                    event.add_tweet(tweet)
                     date_entity_event[pair] = event
                     self.events.append(event)
 
     def prune_events(self,minimum_event_mentions):
         self.events = [event for event in self.events if event.mentions >= minimum_event_mentions]
 
+    def assess_hashtag_consistency(self,event):
+        all_hashtags = sum([[x for x in tweet.entities if x[0] == '#'] for tweet in event.tweets],[])
+        all_unique_hashtags = list(set(all_hashtags))
+        hashtag_count = dict([(hashtag,all_hashtags.count(hashtag)) for hashtag in all_unique_hashtags])
+        consistent_hashtags = [hashtag for hashtag in hashtag_count.keys() if hashtag_count[hashtag] == event.mentions]
+        return consistent_hashtags
+
+    def filter_events(self,consistent_hashtag_threshold=2):
+        filtered_events = []
+        for event in self.events:
+            if not len(self.assess_hashtag_consistency(event)) >= consistent_hashtag_threshold:
+                filtered_events.append(event)
+        self.events = filtered_events
+
     def score_event(self,event,tweet_count):
-        date = event.date
+        date = event.datetime
         entity = event.entities[0]
         event_score = self.calculate_g2(tweet_count,self.date_counts[date],self.entity_counts[entity],event.mentions)
         event.set_score(event_score)
@@ -101,6 +117,7 @@ class EventRanker:
         self.make_counts()
         self.generate_candidate_events()
         self.prune_events(minimum_event_mentions)
-        er.score_events()
-        er.rank_events(cut_off)
+        self.filter_events()
+        self.score_events()
+        self.rank_events(cut_off)
         return self.events

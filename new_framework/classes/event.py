@@ -1,29 +1,41 @@
 
 import json
+from classes.tweet import Tweet
 
 class Event:
     """
     Container for event class
     """
-    def __init__(self,eventdict):
-        self.mentions = 0
-        self.import_dict(eventdict)
+    def __init__(self):
+        self.mentions = 1
+        self.datetime = False
+        self.entities = []
+        self.score = False
+        self.tweets = []
 
-    def import_dict(self,eventdict):
-        self.dict = eventdict
-        self.set_date(eventtdict['date'])
-        self.set_entities(eventdict['entities'])
-        self.set_score(eventdict['score'])
-        self.set_tweets(eventdict['tweets'])
+    def import_eventdict(self,eventdict):
+        self.datetime = self.import_datetime(eventdict['datetime']) if 'datetime' in eventdict.keys() else False 
+        self.entities = eventdict['entities'] if 'entities' in eventdict.keys() else False
+        self.score = float(eventdict['score']) if 'score' in eventdict.keys() else False
+        self.tweets = self.import_tweets(eventdict['tweets']) if 'tweets' in eventdict.keys() else []
 
     def return_dict(self):
-        return json.dumps(self.dict)
+        eventdict = {
+            'datetime':str(self.datetime),
+            'entities':self.entities,
+            'score':self.score,
+            'tweets':[tweet.return_dict() for tweet in self.tweets],
+            'mentions':self.mentions
+        }
+        return eventdict
 
-    def set_date(self,date):
-        self.date = date
+    def import_datetime(self,datetime):
+        date,time = datetime.split()
+        dt = time_functions.return_datetime(date,time,minute=True,setting='vs')
+        return dt
 
-    def set_entities(self,entities):
-        self.entities = entities
+    def set_datetime(self,datetime):
+        self.datetime = datetime
 
     def add_entities(self,entities):
         self.entities.extend(entities)
@@ -31,8 +43,15 @@ class Event:
     def set_score(self,score):
         self.score = score
 
-    def set_tweets(self,tweets):
-        self.tweets = tweets
+    def import_tweets(self,tweets):
+        imported_tweets = [Tweet(tweetdict) for tweetdict in tweets]
+        return imported_tweets
+
+    def add_tweet(self,tweet):
+        self.tweets.append(tweet)
+
+    def add_mention(self,n=1):
+        self.mentions += 1
 
     # def add_tids(self,tids):
     #     self.tids = tids
