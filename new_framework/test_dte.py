@@ -8,6 +8,8 @@ import helpers
 import entity_extractor
 import ucto
 
+from tweet import Tweet
+
 test_tweets = sys.argv[1]
 commonness_txt = sys.argv[2]
 commonness_cls = sys.argv[3]
@@ -24,6 +26,7 @@ cs = commonness.Commonness()
 cs.set_classencoder(commonness_txt, commonness_cls, commonness_corpus)
 cs.set_dmodel(ngrams_score)
 
+tweetsobjs = []
 for tweet in tweets[1:]:
     tokens = tweet.strip().split('\t')
     try:
@@ -36,14 +39,22 @@ for tweet in tweets[1:]:
     text_lower = text.lower()
     dte = dutch_timex_extractor.Dutch_timex_extractor(text_lower, date)
     dte.extract_refdates()
+    tdict = {'id':tokens[1], 'user':tokens[6], 'datetime':date, 'text':text_lower}
+    tweetobj = Tweet(tdict)
     if len(dte.refdates) > 0:
         dte.filter_future_refdates()
-        if len(dte.refdates) > 0:
-            print(dte.refdates)
-            datestrings = [obj[0] for obj in dte.refdates]
-            tweet_chunks = helpers.remove_pattern_from_string(text_lower,datestrings)
-            print(text_lower.encode('utf-8'),'\t'.join(tweet_chunks).encode('utf-8'))
-            ee = entity_extractor.EntityExtractor(cs)
-            ee.extract_entities_strings(tweet_chunks)
-            ee.filter_entities_threshold()
-            print(', '.join([x[0] for x in ee.entities]).encode('utf-8'))
+    tweetobj.set_refdates(dte.refdates)
+    # if len(tweetobj.refdates) > 0:
+    print(dte.refdates)
+    datestrings = [obj[0] for obj in dte.refdates]
+    tweet_chunks = helpers.remove_pattern_from_string(text_lower,datestrings)
+    print(text_lower.encode('utf-8'),'\t'.join(tweet_chunks).encode('utf-8'))
+    ee = entity_extractor.EntityExtractor(cs)
+    ee.extract_entities_strings(tweet_chunks)
+    ee.filter_entities_threshold()
+    tweetobj.set_entities(ee.entities)
+#    print(', '.join([x[0] for x in ee.entities]).encode('utf-8'))
+    tweetobjs.append(tweetobj)
+
+
+
