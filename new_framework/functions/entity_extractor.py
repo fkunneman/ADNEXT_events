@@ -2,7 +2,7 @@
 
 class EntityExtractor:
 
-    def __init__(self, commonness):
+    def __init__(self):
         self.entities = []
         self.commonness = False
 
@@ -47,7 +47,7 @@ class EntityExtractor:
 
     def extract_entities(self,tokens,maximum_token_length_entity=5):
         self.extract_entities_hashtag(tokens)
-        self.extract_entities_string(chunk,maximum_token_length_entity)
+        self.extract_entities_commonness(tokens,maximum_token_length_entity)
 
     def filter_entities_threshold(self, pattern_threshold=0.05):
         self.entities = [entity for entity in self.entities if entity[1] > pattern_threshold]
