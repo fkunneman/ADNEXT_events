@@ -38,7 +38,7 @@ class EntityExtractor:
         hashtags_score = [(hashtag,1) for hashtag in hashtags]
         self.entities.extend(hashtags_score)
 
-    def extract_entities_tokens(self,tokens,maximum_token_length_entity=5):
+    def extract_entities(self,tokens,maximum_token_length_entity=5):
         self.extract_entities_hashtag(tokens)
         self.extract_entities_string(chunk,maximum_token_length_entity)
 
