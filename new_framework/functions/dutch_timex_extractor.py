@@ -85,16 +85,25 @@ class Dutch_timex_extractor:
     def extract_refdates(self, match_date=True, match_month=True, match_timeunit=True, match_day=True):
         # perform chosen information extraction
         if match_date:
-            self.extract_date()
+            try:
+                self.extract_date()
+            except OverflowError:
+                print('overflow',self.tweet_text.encode('utf-8'))
         if match_month:
             try:
                 self.extract_month()
             except OverflowError:
                 print('overflow',self.tweet_text.encode('utf-8'))
         if match_timeunit:
-            self.extract_timeunit()
+            try:
+                self.extract_timeunit()
+            except OverflowError:
+                print('overflow',self.tweet_text.encode('utf-8'))
         if match_day:
-            self.extract_day()
+            try:
+                self.extract_day()
+            except IndexError:
+                print('Index error',self.tweet_text.encode('utf-8'))                
 
     def return_refdates(self):
         # clean up, sort and return reference dates 
@@ -106,8 +115,11 @@ class Dutch_timex_extractor:
             return False 
 
     def match_timex(self, list_patterns):
-
-        return re.findall('|'.join(list_patterns), self.tweet_text)
+        #return re.findall('|'.join(list_patterns), self.tweet_text)
+        matchings = [re.findall(lp,self.tweet_text) for lp in list_patterns]
+        matches = sum([[s for s in m if len(s) > 0] for m in matchings],[])
+        matches = matches if len(matches) > 0 else False
+        return matches
 
     def match2timestring(self, match, joinstr):
         timestring = joinstr.join([x for x in match if x.strip() != ''])
@@ -126,8 +138,8 @@ class Dutch_timex_extractor:
             r'(\b|^)(\d{4}/\d{2}/\d{2})(\b|$)'
         )
 
-        matches = self.match_timex(list_patterns_date)
-        if len(matches) > 0:
+        matches = self.match_timex(list_patterns_date)      
+        if matches:
             for match in matches:
                 datestring = self.match2timestring(match,'')
                 try:
@@ -139,10 +151,10 @@ class Dutch_timex_extractor:
 
     def extract_month(self):
 
-        list_patterns_month = ([r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'])
+        list_pattern_month = r'(\b|^)' + (self.nums_re) + ' ' + (self.months_re) + r'( |$)' + r'(\d{4})?'
 
-        matches = self.match_timex(list_patterns_month)
-        if len(matches) > 0:
+        matches = self.match_timex([list_pattern_month])
+        if matches:
             for match in matches:
                 timestring = self.match2timestring(match,' ')
                 try:
@@ -164,16 +176,10 @@ class Dutch_timex_extractor:
                 self.refdates.append((timestring,refdate))
 
     def extract_timeunit(self):
-        list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |'
-            r'maar |slechts |pakweg |ruim |krap |(maar )?een kleine |'
-            r'(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + 
-            r'($| )', (self.nums_re) + ' ' + (self.timeunits_re) + r'( slapen)? tot',
-            r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |'
-            r'ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + 
-            ' ' + (self.timeunits_re) + r'( nog)? te gaan'])
+        list_patterns_timeunits = ([r'(over|nog) (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + r'($| )', (self.nums_re) + ' ' + (self.timeunits_re) + r'( slapen)? tot', r'met( nog)? (minimaal |maximaal |tenminste |bijna |ongeveer |maar |slechts |pakweg |ruim |krap |(maar )?een kleine |(maar )?iets (meer|minder) dan )?' + (self.nums_re) + ' ' + (self.timeunits_re) + r'( nog)? te gaan'])
 
         matches = self.match_timex(list_patterns_timeunits)
-        if len(matches) > 0:
+        if matches:
             for match in matches:
                 timestring = self.match2timestring(match,' ')
                 num = [x for x in match if x in self.numbers or re.match('\d', x)][0]
@@ -188,35 +194,27 @@ class Dutch_timex_extractor:
 
     def extract_day(self):
 
-        #list_patterns_days = ([r'(volgende week|komende|aankomende|deze) '
-        #    r'(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag) ?'
-        #    r'(avond|nacht|ochtend|middag)?', r'(morgen|overmorgen) ?(avond|nacht|ochtend|middag)?'])
-
-        list_patterns_days = ([r'(volgende week|komende|aankomende|deze) '
-            r'(maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag) ?'
-            r'(avond|nacht|ochtend|middag)?', r'overmorgen ?(avond|nacht|ochtend|middag)?'])
-
+        list_patterns_days = ([r'(morgen|overmorgen)(avond|nacht|ochtend|middag)?', r'(volgende week|komende|aankomende|deze) (maandag|dinsdag|woensdag|donderdag|vrijdag|zaterdag|zondag)(avond|nacht|ochtend|middag)?'])
+ 
         matches = self.match_timex(list_patterns_days)
-
-        if len(matches) > 0:
+        if matches:
             tweet_weekday = self.tweet_date.weekday()
             for match in matches:
-                if len([field for field in match if field != '']) > 0:
-                    timestring = self.match2timestring(match,' ')
-                    if 'morgen' in match:
-                        days_ahead = 1
-                    elif 'overmorgen' in match:
-                        days_ahead = 2
-                    else: # weekdays 
-                        tweet_weekday = self.tweet_date.weekday()
-                        match_weekday = [self.weekdays.index(field) for field in match if field in self.weekdays][0]
-                        if 'volgende week' in match:
-                            bonus = 7
-                        else:
-                            bonus = 0
-                        if tweet_weekday <= match_weekday:
-                            days_ahead = match_weekday - tweet_weekday + bonus
-                        else:
-                            days_ahead = match_weekday + (7-tweet_weekday) + bonus
-                    refdate = self.tweet_date + datetime.timedelta(days = days_ahead)
-                    self.refdates.append((timestring, refdate))
+                timestring = self.match2timestring(match,' ')
+                if 'morgen' in match:
+                    days_ahead = 1
+                elif 'overmorgen' in match:
+                    days_ahead = 2
+                else: # weekdays 
+                    tweet_weekday = self.tweet_date.weekday()
+                    match_weekday = [self.weekdays.index(field) for field in match if field in self.weekdays][0]
+                    if 'volgende week' in match:
+                        bonus = 7
+                    else:
+                        bonus = 0
+                    if tweet_weekday <= match_weekday:
+                        days_ahead = match_weekday - tweet_weekday + bonus
+                    else:
+                        days_ahead = match_weekday + (7-tweet_weekday) + bonus
+                refdate = self.tweet_date + datetime.timedelta(days = days_ahead)
+                self.refdates.append((timestring, refdate))

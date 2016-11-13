@@ -14,9 +14,9 @@ class Tweet:
         self.user = False
         self.text = False
         self.datetime = False
-        self.string_refdates = False
-        self.refdates = False
-        self.entities = False
+        self.string_refdates = []
+        self.refdates = []
+        self.entities = []
 
     def import_tweetdict(self,tweetdict):
         keys = tweetdict.keys()
