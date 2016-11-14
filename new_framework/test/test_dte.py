@@ -11,19 +11,23 @@ from functions import helpers
 from functions import entity_extractor
 from classes.tweet import Tweet
 from functions.event_ranker import EventRanker
-
+from functions.cityref_extractor import CityrefExtractor
 
 outfile = sys.argv[1]
 commonness_txt = sys.argv[2]
 commonness_cls = sys.argv[3]
 commonness_corpus = sys.argv[4]
 ngrams_score = sys.argv[5]
-test_tweets = sys.argv[6:]
+citylistfile = sys.argv[6]
+test_tweets = sys.argv[7:]
 
 print('setting commonness object', commonness_txt, commonness_cls, commonness_corpus, ngrams_score)
 cs = commonness.Commonness()
 cs.set_classencoder(commonness_txt, commonness_cls, commonness_corpus)
 cs.set_dmodel(ngrams_score)
+
+with open(citylistfile,'r',encoding='utf-8') as co:
+    citylist = [x.strip() for x in co.read().strip().split('\n')]
 
 tokenizer = ucto.Tokenizer('/vol/customopt/lamachine/etc/ucto/tokconfig-nl-twitter')
 tweetobjs = []
@@ -65,6 +69,13 @@ for ttf in test_tweets:
         else:
             tweet_chunks = [tweetobj.text]
                 #    print(text_lower.encode('utf-8'),'\t'.join(tweet_chunks).encode('utf-8'))
+        ce = CityrefExtractor(citylist)
+        for chunk in tweet_chunks:
+            ce.find_cityrefs(chunk)
+        cities = ce.return_cityrefs()
+        tweetobj.set_cities(cities)
+        print('locations identified:',cities)
+        tweet_chunks = helpers.remove_pattern_from_string(tweetobj.text,datestrings+cities)
         ee = entity_extractor.EntityExtractor()
         ee.set_commonness(cs)
         for chunk in tweet_chunks:
