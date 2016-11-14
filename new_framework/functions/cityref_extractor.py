@@ -23,4 +23,4 @@ class CityrefExtractor:
         self.cityrefs.extend(matches)
 
     def return_cityrefs(self):
-        return [self.cities_lowercase[cityref] for cityref in self.cityrefs] 
+        return [self.cities_lowercase[cityref] for cityref in list(set(self.cityrefs))] 
