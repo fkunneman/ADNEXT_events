@@ -17,6 +17,7 @@ class Tweet:
         self.string_refdates = []
         self.refdates = []
         self.entities = []
+        self.cityrefs = []
 
     def import_tweetdict(self,tweetdict):
         keys = tweetdict.keys()
@@ -27,6 +28,7 @@ class Tweet:
         self.string_refdates, self.refdates = self.import_refdates(tweetdict['refdates']) if 'refdates' in keys else False, False
         #self.cityrefs = self.import_cityrefs(tweetdict['cityrefs']) if 'cityrefs' in keys else False
         self.entities, self.entities_score = self.import_entities(tweetdict['entities']) if 'entities' in keys else False, False
+        self.cityrefs = tweetdict['cityrefs'] if 'cityrefs' in keys else False
         
     def return_dict(self):
         tweetdict = {
@@ -35,7 +37,8 @@ class Tweet:
             'text':self.text, 
             'datetime':str(self.datetime),
             'refdates':dict([(x[0],str(x[1])) for x in self.string_refdates]),
-            'entities':dict(self.entities_score)
+            'entities':dict(self.entities_score),
+            'cityrefs':self.cityrefs
         }
         return tweetdict
 
@@ -73,15 +76,9 @@ class Tweet:
     def set_entities(self,entities_score):
         self.entities = [x[0] for x in entities_score]
         self.entities_score = entities_score
-        self.dict['entities'] = dict(entities_score)
-
-    def import_cityrefs(self,cityrefs):
-        pass
 
     def set_cityrefs(self,cityrefs):
-        pass
-#self.cityrefs = cityrefs
-        #self.dict['cityrefs'] = cityrefs
+        self.cityrefs = cityrefs
 
     def set_emotions(self,emotions):
         pass
