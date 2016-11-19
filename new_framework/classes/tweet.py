@@ -2,6 +2,7 @@
 import json
 
 import time_functions
+import datetime
 
 class Tweet:
     """
@@ -26,10 +27,20 @@ class Tweet:
         self.text = tweetdict['text']
         self.datetime = self.import_datetime(tweetdict['datetime'])
         self.string_refdates, self.refdates = self.import_refdates(tweetdict['refdates']) if 'refdates' in keys else False, False
-        #self.cityrefs = self.import_cityrefs(tweetdict['cityrefs']) if 'cityrefs' in keys else False
         self.entities, self.entities_score = self.import_entities(tweetdict['entities']) if 'entities' in keys else False, False
         self.cityrefs = tweetdict['cityrefs'] if 'cityrefs' in keys else False
-        
+
+    def import_twiqsdict(self,twiqsdict):
+        month = {"Jan" : "01", "Feb" : "02", "Mar" : "03", "Apr" : "04", "May" : "05", "Jun" : "06", "Jul" : "07", 
+            "Aug" : "08", "Sep" : "09", "Oct" : "10", "Nov" : "11", "Dec" : "12"}
+        date_time = re.compile(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d+) (\d{2}:\d{2}:\d{2}) \+\d+ (\d{4})")
+        self.id = tweetdict['id']
+        self.user = tweetdict['user']['screen_name']
+        self.text = tweetdict['text']
+        dt = date_time.search(tweetdict['created_at']).groups()
+        timefields = [int(f) for f in dt[2].split(':')]
+        self.datetime = datetime.datetime(int(dt[3]), int(month[dt[0]]), int(dt[1]), timefields[0], timefields[1], timefields[2])
+
     def return_dict(self):
         tweetdict = {
             'id':self.id, 
