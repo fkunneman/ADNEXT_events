@@ -1,5 +1,6 @@
 
 import json
+import re
 
 import time_functions
 import datetime
@@ -18,6 +19,7 @@ class Tweet:
         self.string_refdates = []
         self.refdates = []
         self.entities = []
+        self.entities_score = []
         self.cityrefs = []
 
     def import_tweetdict(self,tweetdict):
@@ -26,18 +28,18 @@ class Tweet:
         self.user = tweetdict['user']
         self.text = tweetdict['text']
         self.datetime = self.import_datetime(tweetdict['datetime'])
-        self.string_refdates, self.refdates = self.import_refdates(tweetdict['refdates']) if 'refdates' in keys else False, False
-        self.entities, self.entities_score = self.import_entities(tweetdict['entities']) if 'entities' in keys else False, False
-        self.cityrefs = tweetdict['cityrefs'] if 'cityrefs' in keys else False
+        self.string_refdates, self.refdates = self.import_refdates(tweetdict['refdates']) 
+        self.entities, self.entities_score = self.import_entities(tweetdict['entities']) 
+        self.cityrefs = tweetdict['cityrefs'] 
 
     def import_twiqsdict(self,twiqsdict):
         month = {"Jan" : "01", "Feb" : "02", "Mar" : "03", "Apr" : "04", "May" : "05", "Jun" : "06", "Jul" : "07", 
             "Aug" : "08", "Sep" : "09", "Oct" : "10", "Nov" : "11", "Dec" : "12"}
         date_time = re.compile(r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d+) (\d{2}:\d{2}:\d{2}) \+\d+ (\d{4})")
-        self.id = tweetdict['id']
-        self.user = tweetdict['user']['screen_name']
-        self.text = tweetdict['text']
-        dt = date_time.search(tweetdict['created_at']).groups()
+        self.id = twiqsdict['id']
+        self.user = twiqsdict['user']['screen_name']
+        self.text = twiqsdict['text']
+        dt = date_time.search(twiqsdict['created_at']).groups()
         timefields = [int(f) for f in dt[2].split(':')]
         self.datetime = datetime.datetime(int(dt[3]), int(month[dt[0]]), int(dt[1]), timefields[0], timefields[1], timefields[2])
 
@@ -79,9 +81,9 @@ class Tweet:
         self.string_refdates = refdates
         self.refdates = [x[1] for x in refdates]
 
-    def import_entities(self,entities_score):
-        imported_entities = [x[0] for x in entities_score]
-        imported_entities_score = [(x[0],float(x[1])) for x in entities_score]
+    def import_entities(self,entities_score_dict):
+        entities_score = entities_score_dict.items()
+        entities = [x[0] for x in entities_score]
         return entities, entities_score
 
     def set_entities(self,entities_score):

@@ -6,15 +6,16 @@ import json
 
 from functions import dutch_timex_extractor
 from classes import tweet
+from modules.tokenize_instances import Tokenize
 
-class DateExtractorTask(Task):
+class ExtractDaterefTask(Task):
 
     in_tokenized = InputSlot()
 
-    skip_date = BoolParameter()
-    skip_month = BoolParameter()
-    skip_timeunit = BoolParameter()
-    skip_day = BoolParameter()
+    skip_datematch = BoolParameter()
+    skip_monthmatch = BoolParameter()
+    skip_timeunitmatch = BoolParameter()
+    skip_daymatch = BoolParameter()
 
     def out_dateref(self):
         return self.outputfrominput(inputformat='tokenized', stripextension='.tok.json', addextension='.dateref.json')
@@ -23,38 +24,44 @@ class DateExtractorTask(Task):
         
         # read in tweets
         with open(self.in_tokenized().path, 'r', encoding = 'utf-8') as file_in:
-            tweetdicts = json.loads(file_in)
+            tweetdicts = json.loads(file_in.read())
 
         # format as tweet objects
-        tweets = [tweet.Tweet(tweetdict) for tweetdict in tweetdicts]
+        tweets = []
+        for td in tweetdicts:
+            tweetobj = tweet.Tweet()
+            tweetobj.import_tweetdict(td)
+            tweets.append(tweetobj)
 
-        for tweet in tweets:
-            dte = dutch_timex_extractor.Dutch_timex_extractor(tweet.text, tweet.date)
+        # extract daterefs
+        for tweetobj in tweets:
+            dte = dutch_timex_extractor.Dutch_timex_extractor(tweetobj.text, tweetobj.datetime)
+            dte.extract_refdates(self.skip_datematch,self.skip_monthmatch,self.skip_timeunitmatch,self.skip_daymatch)
+            dte.filter_future_refdates()
+            tweetobj.set_refdates(dte.refdates)
 
-        if self.lowercase:
-            documents = [doc.lower() for doc in documents]
-
-        ft = featurizer.Featurizer(documents, features)
-        ft.fit_transform()
-        instances, vocabulary = ft.return_instances(['token_ngrams'], )
-
-        numpy.savez(self.out_features().path, data=instances.data, indices=instances.indices, indptr=instances.indptr, shape=instances.shape)
-
-        vocabulary = list(vocabulary)
-        with open(self.out_vocabulary().path,'w',encoding='utf-8') as vocab_out:
-            vocab_out.write('\n'.join(vocabulary))
+        # write to file
+        outtweets = [tweet.return_dict() for tweet in tweets]
+        with open(self.out_dateref().path,'w',encoding='utf-8') as file_out:
+            json.dump(outtweets,file_out)
         
 @registercomponent
-class Featurize(StandardWorkflowComponent):
-    token_ngrams = Parameter(default='1 2 3')
-    blackfeats = Parameter(default=False)
-    lowercase = BoolParameter(default=True)    
+class ExtractDateref(StandardWorkflowComponent):
 
-    tokconfig = Parameter(default=False)
-    strip_punctuation = BoolParameter(default=True)
+    skip_datematch = BoolParameter()
+    skip_monthmatch = BoolParameter()
+    skip_timeunitmatch = BoolParameter()
+    skip_daymatch = BoolParameter()
+
+    config = Parameter()
+    strip_punctuation = BoolParameter()
+    to_lowercase = BoolParameter()
 
     def accepts(self):
-        return InputFormat(self, format_id='tokenized', extension='tok.txt'), InputComponent(self, Tokenize, config=self.tokconfig, strip_punctuation=self.strip_punctuation)
+        return (
+            InputFormat(self, format_id='tokenized', extension='tok.json'),
+            InputComponent(self, Tokenize, config=self.config, strip_punctuation=self.strip_punctuation, lowercase=self.to_lowercase)
+        )
                     
     def autosetup(self):
-        return Featurize_tokens
+        return ExtractDaterefTask
