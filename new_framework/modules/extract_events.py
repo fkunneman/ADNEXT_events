@@ -36,9 +36,9 @@ class ExtractEventsTask(Task):
         end_date_month = self.end_date[4:6]
         end_date_day = self.end_date[6:]
         last_date = datetime.date(int(end_date_year),int(end_date_month),int(end_date_day))
-        first_date = last_date - datetime.timedelta(days = self.window_size)
+        first_date = last_date - datetime.timedelta(days = self.window_size-1)
         last_tweetfile = self.in_tweetdir().path + '/' + end_date_year + end_date_month + '/' + end_date_year + end_date_month + end_date_day + '-23.out.dateref.cityref.entity.json'
-        days_tweetfiles = helpers.return_tweetfiles_window(last_tweetfile,self.window_size)
+        days_tweetfiles = helpers.return_tweetfiles_window(last_tweetfile,self.window_size-1)
         tweetfiles = []
         for day in days_tweetfiles:
             tweetfiles.extend([ filename for filename in glob.glob(self.in_tweetdir().path + '/' + day + '*') ])
@@ -48,13 +48,12 @@ class ExtractEventsTask(Task):
         # read in tweets
         print('Reading in tweets')
         for tweetfile in tweetfiles:
-            print(tweetfile)
             date = helpers.return_date_entitytweetfile(tweetfile)
             with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
                 tweetdicts = json.loads(file_in.read())
             # format as tweet objects
             for td in tweetdicts:
-                if not td['refdates'] == {} and td['entities'] == {}:
+                if not (td['refdates'] == {} and td['entities'] == {}):
                     tweetobj = tweet.Tweet()
                     tweetobj.import_tweetdict(td)
                     er.add_tweet(tweetobj)
