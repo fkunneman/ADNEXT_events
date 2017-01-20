@@ -82,24 +82,24 @@ class Dutch_timex_extractor:
         self.timeunits_re = (r'(dagen|daagjes|dag|dagje|nachten|nachtjes|nacht|nachtje|weken|weekjes|week|'
             r'weekje|maanden|maandjes|maand|maandje)')
 
-    def extract_refdates(self, match_date=True, match_month=True, match_timeunit=True, match_day=True):
+    def extract_refdates(self, skip_date=False, skip_month=False, skip_timeunit=False, skip_day=False):
         # perform chosen information extraction
-        if match_date:
+        if not skip_date:
             try:
                 self.extract_date()
             except OverflowError:
                 print('overflow',self.tweet_text.encode('utf-8'))
-        if match_month:
+        if not skip_month:
             try:
                 self.extract_month()
             except OverflowError:
                 print('dateoverflow',self.tweet_text.encode('utf-8'))
-        if match_timeunit:
+        if not skip_timeunit:
             try:
                 self.extract_timeunit()
             except OverflowError:
                 print('overflow',self.tweet_text.encode('utf-8'))
-        if match_day:
+        if not skip_day:
             try:
                 self.extract_day()
             except IndexError:
