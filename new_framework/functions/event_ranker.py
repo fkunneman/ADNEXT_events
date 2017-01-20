@@ -1,5 +1,5 @@
 
-from collections import Counter
+from collections import Counter, defaultdict
 from itertools import product
 import math
 
@@ -13,8 +13,8 @@ class EventRanker:
         self.events = []
         self.date_entity_event = {}
         self.tweet_counts = Counter()
-        self.date_counts = Counter()
-        self.entity_counts = Counter()
+        self.date_counts = defaultdict(lambda : Counter())
+        self.entity_counts = defaultdict(lambda : Counter())
 
     def add_tweet(self,tweet):
         self.make_counts(tweet)
@@ -33,27 +33,37 @@ class EventRanker:
                 self.events.append(event)                
 
     def extract_events(self,date_start,window_size,minimum_event_mentions=5,cut_off=2500):
-        tweet_count = sum([self.tweet_counts[date] for date in helpers.return_daterange(date_start,window_size)])
-        events_score = self.score_events(self.filter_events(self.prune_events(minimum_event_mentions)),tweet_count)
+        dates = helpers.return_daterange(date_start,window_size)
+        tweet_count = sum([self.tweet_counts[date] for date in dates])
+        date_counts = sum([self.date_counts[date] for date in dates])
+        entity_counts = sum([self.entity_counts[date] for date in dates])
+        events_score = self.score_events(self.filter_events(self.prune_events(minimum_event_mentions)),tweet_count,date_counts,entity_counts)
         ranked_events = self.rank_events(events_score,cut_off)
         return ranked_events
 
     def discard_tweets(self,discard_date):
-        pass
-
-    def discard_tweet_event(self,event,tweet):
-        pass
-
-    def score_events(self,events):
-        tweet_count = len(self.tweets)
+        # discard tweets from events
+        for event in self.events:
+            for tweet in event.tweets:
+                if tweet.datetime.date() == discard_date:
+                    event.remove(tweet)
+                    event.mentions-=1
+            if event.mentions == 0:
+                self.events.remove(event)
+        # discard counts 
+        del self.tweet_counts[discard_date]
+        del self.date_counts[discard_date]
+        del self.entity_counts[discard_date]
+        
+    def score_events(self,events,tweet_count,date_counts,entity_counts):
         for event in events:
-            self.score_event(event,tweet_count)
+            self.score_event(event,tweet_count,date_counts,entity_counts)
         return events
 
-    def score_event(self,event,tweet_count):
+    def score_event(self,event,tweet_count,date_counts,entity_counts):
         date = event.datetime
         entity = event.entities[0]
-        event_score = self.calculate_g2(tweet_count,self.date_counts[date],self.entity_counts[entity],event.mentions)
+        event_score = self.calculate_g2(tweet_count,date_counts[date],entity_counts[entity],event.mentions)
         event.set_score(event_score)
 
     def rank_events(self,events,cut_off):
@@ -96,17 +106,16 @@ class EventRanker:
     def count_refdates(self,tweet):
         dates = tweet.refdates
         date_counts = self.list2unidict(dates,1)
-        self.date_counts.update(date_counts)
+        self.date_counts[tweet.datetime.date()].update(date_counts)
 
     def count_entities(self,tweet):
         entities = tweet.entities
         entity_counts = self.list2unidict(entities,1)
-        self.entity_counts.update(entity_counts)
+        self.entity_counts[tweet.datetime.date()].update(entity_counts)
         
-    def make_counts(self):
-        for tweet in self.tweets:
-            self.count_refdates(tweet)
-            self.count_entities(tweet)
+    def make_counts(self,tweet):
+        self.count_refdates(tweet)
+        self.count_entities(tweet)
 
     def generate_candidate_events(self):
         # Find out all possible pairs of dates and entities
