@@ -9,7 +9,7 @@ def remove_pattern_from_string(string,patterns):
     return stripped_string
 
 def return_date_entitytweetfile(tweetfile):
-    return datetime(int(tweetfile[-43:-39]),int(tweetfile[-39:-37]),int(tweetfile[-37:-35]),0,0,0)
+    return date(int(tweetfile[-43:-39]),int(tweetfile[-39:-37]),int(tweetfile[-37:-35]))
 
 def return_tweetfiles_window(last_tweetfile, window_size):
     tweetfile_dt = return_date_entitytweetfile(last_tweetfile)

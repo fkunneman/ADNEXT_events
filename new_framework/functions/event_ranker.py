@@ -35,9 +35,10 @@ class EventRanker:
     def extract_events(self,date_start,window_size,minimum_event_mentions=5,cut_off=2500):
         dates = helpers.return_daterange(date_start,window_size)
         tweet_count = sum([self.tweet_counts[date] for date in dates])
-        date_counts = sum([self.date_counts[date] for date in dates])
-        entity_counts = sum([self.entity_counts[date] for date in dates])
-        events_score = self.score_events(self.filter_events(self.prune_events(minimum_event_mentions)),tweet_count,date_counts,entity_counts)
+        date_counts = sum([self.date_counts[date] for date in dates],Counter())
+        entity_counts = sum([self.entity_counts[date] for date in dates],Counter())
+        filtered_events = self.filter_events(self.prune_events(minimum_event_mentions))
+        events_score = self.score_events(filtered_events,tweet_count,date_counts,entity_counts)
         ranked_events = self.rank_events(events_score,cut_off)
         return ranked_events
 
@@ -146,13 +147,9 @@ class EventRanker:
         consistent_hashtags = [hashtag for hashtag in hashtag_count.keys() if hashtag_count[hashtag] == event.mentions]
         return consistent_hashtags
 
-    def filter_events(self,events,mconsistent_hashtag_threshold=2):
+    def filter_events(self,events,consistent_hashtag_threshold=2):
         filtered_events = []
         for event in events:
             if not len(self.assess_hashtag_consistency(event)) >= consistent_hashtag_threshold:
                 filtered_events.append(event)
         return filtered_events
-
-
-
-
