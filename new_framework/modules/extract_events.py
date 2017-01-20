@@ -4,48 +4,63 @@ from luiginlp.engine import Task, StandardWorkflowComponent, InputFormat, InputC
 
 import json
 import glob
+from datetime import datetime, date, timedelta
 
 from functions import event_ranker, helpers
 from classes import event, tweet
 
 class ExtractEventsTask(Task):
 
-    in_entity = InputSlot()
+    in_tweetdir = InputSlot()
 
+    end_date = Parameter()
     window_size = IntParameter()
     minimum_event_mentions = IntParameter()
     cut_off = IntParameter()
 
+    def out_eventdir(self):
+        return self.outputfrominput(inputformat='tweetdir', stripextension='.tweets', addextension='.events')
+
     def out_events(self):
-        return self.outputfrominput(inputformat='entity', stripextension='-00.out.dateref.cityref.json', addextension='.events.json')
+        return self.outputfrominput(inputformat='tweetdir', stripextension='.tweets', addextension='.events/' + self.end_date + '.events.json')
 
     def run(self):
 
+        # if directory does not exist, create directory
+        self.setup_output_dir(self.out_eventdir().path)
+
         # collect tweet files
-        tweet_directory = '/'.join(self.in_entity().path.split('/')[:-2])
-        days_tweetfiles = helpers.return_tweetfiles_window(self.in_entity().path,self.window_size)
+        end_date_year = end_date[:4]
+        end_date_month = end_date[4:6]
+        end_date_day = end_date[6:]
+        last_date = datetime.date(int(end_date_year),int(end_date_month),int(end_date_day))
+        first_date = last_date - timedelta(days = self.window_size)
+        last_tweetfile = self.in_tweetdir().path + '/' + end_date_year + end_date_month + '/' + end_date_year + end_date_month + end_date_day + '-23.out.dateref.cityref.entity.json'
+        days_tweetfiles = helpers.return_tweetfiles_window(last_tweetfile,self.window_size)
         tweetfiles = []
         for day in days_tweetfiles:
-            tweetfiles.extend([ filename for filename in glob.glob(tweet_directory + '/' + day + '*') ])
-    
-        # read in tweets
-        print('Reading in tweets')
-        tweetdicts = []
-        for tweetfile in tweetfiles:
-            with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
-                tweetdicts.extend(json.loads(file_in.read()))
-
-        # format as tweet objects
-        tweets = []
-        for td in tweetdicts:
-            tweetobj = tweet.Tweet()
-            tweetobj.import_tweetdict(td)
-            tweets.append(tweetobj)
+            tweetfiles.extend([ filename for filename in glob.glob(self.in_tweetdir().path + '/' + day + '*') ])
 
         # extract events
-        print('Starting event extraction with',len(tweets),'tweets')
-        er = event_ranker.EventRanker(tweets)
-        events = er.extract_events(self.minimum_event_mentions,self.cut_off)
+        er = event_ranker.EventRanker()
+        # read in tweets
+        print('Reading in tweets')
+        for tweetfile in tweetfiles:
+            print(tweetfile)
+            date = return_date_entitytweetfile(tweetfile)
+            with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
+                tweetdicts = json.loads(file_in.read())
+            # format as tweet objects
+            for td in tweetdicts:
+                if not td['refdates'] == {} and td['entities'] == {}:
+                    tweetobj = tweet.Tweet()
+                    tweetobj.import_tweetdict(td)
+                    er.add_tweet(tweetobj)
+                er.tweet_counts[date] += 1
+
+        # extract events
+        print('Performing event extraction')
+        ranked_events = er.extract_events(first_date,self.window_size,self.minimum_event_mentions,self.cut_off)
 
         # write to file
         outevents = [event.return_dict() for event in events]
@@ -55,12 +70,13 @@ class ExtractEventsTask(Task):
 @registercomponent
 class ExtractEvents(StandardWorkflowComponent):
 
+    end_date = Parameter()
     window_size = IntParameter(default=30)
     minimum_event_mentions = IntParameter(default=5)
     cut_off = IntParameter(default=2500)
 
     def accepts(self):
-        return InputFormat(self, format_id='entity', extension='.entity.json')
+        return InputFormat(self, format_id='tweetdir', extension='.tweets')
 
     def autosetup(self):
         return ExtractEventsTask

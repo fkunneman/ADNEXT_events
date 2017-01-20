@@ -4,15 +4,61 @@ from itertools import product
 import math
 
 from classes.event import Event
+from functions import helpers
 
 class EventRanker:
 
-    def __init__(self, tweets):
-        self.tweets = tweets
+    def __init__(self):
+        self.tweets = []
         self.events = []
         self.date_entity_event = {}
+        self.tweet_counts = Counter()
         self.date_counts = Counter()
         self.entity_counts = Counter()
+
+    def add_tweet(self,tweet):
+        self.make_counts(tweet)
+        date_entity_pairs = self.pair_lists(tweet.refdates,tweet.entities)
+        for pair in date_entity_pairs:
+            try:
+                event = self.date_entity_event[pair]
+                event.mentions += 1
+                event.add_tweet(tweet)
+            except: # event pair not yet seen
+                event = Event()
+                event.set_datetime(pair[0])
+                event.add_entities([pair[1]])
+                event.add_tweet(tweet)
+                self.date_entity_event[pair] = event
+                self.events.append(event)                
+
+    def extract_events(self,date_start,window_size,minimum_event_mentions=5,cut_off=2500):
+        tweet_count = sum([self.tweet_counts[date] for date in helpers.return_daterange(date_start,window_size)])
+        events_score = self.score_events(self.filter_events(self.prune_events(minimum_event_mentions)),tweet_count)
+        ranked_events = self.rank_events(events_score,cut_off)
+        return ranked_events
+
+    def discard_tweets(self,discard_date):
+        pass
+
+    def discard_tweet_event(self,event,tweet):
+        pass
+
+    def score_events(self,events):
+        tweet_count = len(self.tweets)
+        for event in events:
+            self.score_event(event,tweet_count)
+        return events
+
+    def score_event(self,event,tweet_count):
+        date = event.datetime
+        entity = event.entities[0]
+        event_score = self.calculate_g2(tweet_count,self.date_counts[date],self.entity_counts[entity],event.mentions)
+        event.set_score(event_score)
+
+    def rank_events(self,events,cut_off):
+        ranked_events = sorted(self.events,key = lambda k: k.score,reverse=True)[:cut_off]
+        return ranked_events
 
     def list2unidict(self,l,uniform_value):
         return dict(zip(l,[uniform_value]*len(l)))
@@ -82,7 +128,7 @@ class EventRanker:
                     self.events.append(event)
 
     def prune_events(self,minimum_event_mentions):
-        self.events = [event for event in self.events if event.mentions >= minimum_event_mentions]
+        return [event for event in self.events if event.mentions >= minimum_event_mentions]
 
     def assess_hashtag_consistency(self,event):
         all_hashtags = sum([[x for x in tweet.entities if x[0] == '#'] for tweet in event.tweets],[])
@@ -91,33 +137,13 @@ class EventRanker:
         consistent_hashtags = [hashtag for hashtag in hashtag_count.keys() if hashtag_count[hashtag] == event.mentions]
         return consistent_hashtags
 
-    def filter_events(self,consistent_hashtag_threshold=2):
+    def filter_events(self,events,mconsistent_hashtag_threshold=2):
         filtered_events = []
-        for event in self.events:
+        for event in events:
             if not len(self.assess_hashtag_consistency(event)) >= consistent_hashtag_threshold:
                 filtered_events.append(event)
-        self.events = filtered_events
+        return filtered_events
 
-    def score_event(self,event,tweet_count):
-        date = event.datetime
-        entity = event.entities[0]
-        event_score = self.calculate_g2(tweet_count,self.date_counts[date],self.entity_counts[entity],event.mentions)
-        event.set_score(event_score)
 
-    def score_events(self):
-        tweet_count = len(self.tweets)
-        for event in self.events:
-            self.score_event(event,tweet_count)
 
-    def rank_events(self,cut_off):
-        ranked_events = sorted(self.events,key = lambda k: k.score,reverse=True)[:cut_off]
-        self.events = ranked_events
 
-    def extract_events(self,minimum_event_mentions=5,cut_off=2500):
-        self.make_counts()
-        self.generate_candidate_events()
-        self.prune_events(minimum_event_mentions)
-        self.filter_events()
-        self.score_events()
-        self.rank_events(cut_off)
-        return self.events
