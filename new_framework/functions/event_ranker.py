@@ -118,25 +118,6 @@ class EventRanker:
         self.count_refdates(tweet)
         self.count_entities(tweet)
 
-    def generate_candidate_events(self):
-        # Find out all possible pairs of dates and entities
-        all_date_entity_pairs = self.pair_lists(self.date_counts.keys(),self.entity_counts.keys())
-        date_entity_event = self.list2unidict(all_date_entity_pairs,False)
-        for tweet in self.tweets:
-            date_entity_pairs = self.pair_lists(tweet.refdates,tweet.entities)
-            for pair in date_entity_pairs:
-                if date_entity_event[pair]: # event already exists, add tweets and counts
-                    event = date_entity_event[pair]
-                    event.add_mention()
-                    event.add_tweet(tweet)
-                else: # new event should be made
-                    event = Event()
-                    event.set_datetime(pair[0])
-                    event.add_entities([pair[1]])
-                    event.add_tweet(tweet)
-                    date_entity_event[pair] = event
-                    self.events.append(event)
-
     def prune_events(self,minimum_event_mentions):
         return [event for event in self.events if event.mentions >= minimum_event_mentions]
 
