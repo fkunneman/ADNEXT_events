@@ -45,10 +45,12 @@ class EventRanker:
     def discard_tweets(self,discard_date):
         # discard tweets from events
         for event in self.events:
-            for tweet in event.tweets:
-                if tweet.datetime.date() == discard_date:
-                    event.remove(tweet)
-                    event.mentions-=1
+            print('before',len(event.tweets))
+            for tweet in event.date_tweets[discard_date]:
+                  event.tweets.remove(tweet)
+                  event.mentions-=1
+            del event.date_tweets[discard_date]
+            print('after',len(event.tweets))
             if event.mentions == 0:
                 self.events.remove(event)
         # discard counts 

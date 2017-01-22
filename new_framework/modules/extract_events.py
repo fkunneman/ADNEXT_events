@@ -44,7 +44,7 @@ class ExtractEventsSliderTask(Task):
     cut_off = IntParameter()
 
     def out_eventdir(self):
-        return self.outputfrominput(inputformat='tweetdir', stripextension='.tweets', addextension='.' + start_date + '_' + end_date + '.events')
+        return self.outputfrominput(inputformat='tweetdir', stripextension='.tweets', addextension='.events/' + self.start_date + '_' + self.end_date + '.events')
 
     def run(self):
 
@@ -65,12 +65,12 @@ class ExtractEventsSliderTask(Task):
         print('Reading in first window of tweets')
         er = event_ranker.EventRanker()
         cursor_date = first_date
-        while cursor_date < firstdate+datetime.timedelta(days=self.window_size):
+        while cursor_date < first_date+datetime.timedelta(days=self.window_size):
             print(cursor_date)
-            tweetfiles = helpers.return_timeobj_date(cursor_date)
+            tweetfiles = [ filename for filename in glob.glob(self.in_tweetdir().path + '/' + helpers.return_timeobj_date(cursor_date) + '*') ]
             for tweetfile in tweetfiles:
                 # read in tweets
-                with open(self.in_tweetdir().path + '/' + tweetfile, 'r', encoding = 'utf-8') as file_in:
+                with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
                     tweetdicts = json.loads(file_in.read())
                 # add tweets to event ranker
                 for td in tweetdicts:
@@ -92,18 +92,17 @@ class ExtractEventsSliderTask(Task):
         # slide window forward and perform event extraction until last date 
         print('Starting slider')
         window_tail = first_date
-        window_head = cursor_date
+        window_head = cursor_date-datetime.timedelta(days=1)
         while window_head <= last_date:
-            print('new window; tail:',window_tail,'head:',window_head)
             while window_head < window_head+datetime.timedelta(days=self.slider):
                 window_tail = window_tail + datetime.timedelta(days=1)
                 window_head = window_head + datetime.timedelta(days=1)
                 # remove tweets of tail
                 er.discard_tweets(window_tail)
-                tweetfiles = helpers.return_timeobj_date(window_head)
+                tweetfiles = [ filename for filename in glob.glob(self.in_tweetdir().path + '/' + helpers.return_timeobj_date(window_head) + '*') ]
                 for tweetfile in tweetfiles:
                     # read in tweets
-                    with open(self.in_tweetdir().path + '/' + tweetfile, 'r', encoding = 'utf-8') as file_in:
+                    with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
                         tweetdicts = json.loads(file_in.read())
                     # add tweets to event ranker
                     for td in tweetdicts:
@@ -112,6 +111,7 @@ class ExtractEventsSliderTask(Task):
                             tweetobj.import_tweetdict(td)
                             er.add_tweet(tweetobj)
                         er.tweet_counts[cursor_date] += 1               
+            print('new window; tail:',window_tail,'head:',window_head)
             print('Performing event extraction')
             ranked_events = er.extract_events(window_tail,self.window_size,self.minimum_event_mentions,self.cut_off)
             print('Done. Extracted',len(ranked_events),'events')                    

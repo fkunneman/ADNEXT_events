@@ -1,6 +1,7 @@
 
 import json
 from classes.tweet import Tweet
+from collections import defaultdict
 
 class Event:
     """
@@ -12,6 +13,7 @@ class Event:
         self.entities = []
         self.score = False
         self.tweets = []
+        self.date_tweets = defaultdict(list)
 
     def import_eventdict(self,eventdict):
         self.datetime = self.import_datetime(eventdict['datetime']) if 'datetime' in eventdict.keys() else False 
@@ -49,6 +51,7 @@ class Event:
 
     def add_tweet(self,tweet):
         self.tweets.append(tweet)
+        self.date_tweets[tweet.datetime.date()].append(tweet)
 
     def add_mention(self,n=1):
         self.mentions += 1
