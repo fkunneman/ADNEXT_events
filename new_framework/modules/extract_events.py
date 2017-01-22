@@ -65,7 +65,8 @@ class ExtractEventsSliderTask(Task):
         # perform event extraction on first tweet window
         print('Reading in first window of tweets')
         cursor_date = first_date
-        date_tweetdicts = defaultdict(list)
+        date_tweetobjects = defaultdict(list)
+        date_tweetcounts = defaultdict(int)
         window_dates = []
         while cursor_date < first_date+datetime.timedelta(days=self.window_size):
             print(cursor_date)
@@ -74,23 +75,26 @@ class ExtractEventsSliderTask(Task):
                 # read in tweets
                 with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
                     tweetdicts = json.loads(file_in.read())
-                date_tweetdicts[cursor_date].extend(tweetdicts)
+                date_tweetcounts[cursor_date] += len(tweetdicts)
+                for td in tweetdicts:
+                    if not (td['refdates'] == {} and td['entities'] == {}):
+                        tweetobj = tweet.Tweet()
+                        tweetobj.import_tweetdict(td)
+                        date_tweetobjects[cursor_date].append(tweetobj)
             window_dates.append(cursor_date)
+            cursor_date += datetime.timedelta(days=1)
         # start event extraction
         print('Loading tweets into event extractor')
         er = event_ranker.EventRanker()
         for date in window_dates:
-            for td in date_tweetdicts[date]:
-                if not (td['refdates'] == {} and td['entities'] == {}):
-                    tweetobj = tweet.Tweet()
-                    tweetobj.import_tweetdict(td)
-                    er.add_tweet(tweetobj)
-                er.tweet_count += 1               
+            for tweetobject in date_tweetobjects[date]:
+                er.add_tweet(tweetobject)
+            er.tweet_count += date_tweetcounts[date]               
         print('Performing event extraction')
-        ranked_events = er.extract_events(first_date,self.window_size,self.minimum_event_mentions,self.cut_off)
-        print('Done. Extracted',len(ranked_events),'events')        
+        er.extract_events(self.minimum_event_mentions,self.cut_off)
+        print('Done. Extracted',len(er.events),'events')        
         # write to file
-        outevents = [event.return_dict() for event in ranked_events]
+        outevents = [event.return_dict() for event in er.events]
         with open(self.out_eventdir().path + '/' + str(cursor_date-datetime.timedelta(days=1)).replace('-','') + '.events','w',encoding='utf-8') as file_out:
             json.dump(outevents,file_out)
 
@@ -101,33 +105,39 @@ class ExtractEventsSliderTask(Task):
         window_head = cursor_date-datetime.timedelta(days=1)
         while window_head <= last_date:
             print('Discarding and collecting tweets')
-            while window_head < window_head+datetime.timedelta(days=self.slider):
+            end_slider = window_head+datetime.timedelta(days=self.slider)
+            while window_head < end_slider:
                 # remove tweets of tail
-                del date_tweetdicts[window_tail]
+                print('Deleting records for old tail',window_tail)
+                del date_tweetobjects[window_tail]
+                del date_tweetcounts[window_tail]
                 window_tail = window_tail + datetime.timedelta(days=1)
                 window_head = window_head + datetime.timedelta(days=1)
+                print('Collecting tweets for new head',window_head)
                 tweetfiles = [ filename for filename in glob.glob(self.in_tweetdir().path + '/' + helpers.return_timeobj_date(window_head) + '*') ]
                 for tweetfile in tweetfiles:
                     # read in tweets
                     with open(tweetfile, 'r', encoding = 'utf-8') as file_in:
-                        date_tweetdicts[window_head] = json.loads(file_in.read())
+                        tweetdicts = json.loads(file_in.read())
+                    date_tweetcounts[window_head] += len(tweetdicts)
+                    for td in tweetdicts:
+                        if not (td['refdates'] == {} and td['entities'] == {}):
+                            tweetobj = tweet.Tweet()
+                            tweetobj.import_tweetdict(td)
+                            date_tweetobjects[window_head].append(tweetobj)
             # add tweets to event ranker
             print('Loading tweets into event extractor for',window_tail,'-',window_head)
             er = event_ranker.EventRanker()
             window_dates = helpers.return_daterange(window_tail,self.window_size)
-            print(window_dates)
             for date in window_dates:
-                for td in date_tweetdicts[date]:
-                    if not (td['refdates'] == {} and td['entities'] == {}):
-                        tweetobj = tweet.Tweet()
-                        tweetobj.import_tweetdict(td)
-                        er.add_tweet(tweetobj)
-                    er.tweet_count += 1               
+                for tweetobject in date_tweetobjects[date]:
+                    er.add_tweet(tweetobject)
+                er.tweet_count += date_tweetcounts[date]
             print('Performing event extraction')
-            ranked_events = er.extract_events(window_tail,self.window_size,self.minimum_event_mentions,self.cut_off)
-            print('Done. Extracted',len(ranked_events),'events')                    
+            er.extract_events(self.minimum_event_mentions,self.cut_off)
+            print('Done. Extracted',len(er.events),'events')                    
             # write to file
-            outevents = [event.return_dict() for event in ranked_events]
+            outevents = [event.return_dict() for event in er.events]
             with open(self.out_eventdir().path + '/' + str(window_head).replace('-','') + '.events','w',encoding='utf-8') as file_out:
                 json.dump(outevents,file_out)
 
