@@ -9,12 +9,15 @@ from functions import helpers
 class EventRanker:
 
     def __init__(self):
-        self.tweets = []
         self.events = []
         self.date_entity_event = {}
-        self.tweet_counts = Counter()
-        self.date_counts = defaultdict(lambda : Counter())
-        self.entity_counts = defaultdict(lambda : Counter())
+        self.tweet_count = 0
+        self.date_counts = Counter()
+        self.entity_counts = Counter()
+
+############################################################
+### Primary functions
+############################################################
 
     def add_tweet(self,tweet):
         self.make_counts(tweet)
@@ -32,67 +35,53 @@ class EventRanker:
                 self.date_entity_event[pair] = event
                 self.events.append(event)                
 
-    def extract_events(self,date_start,window_size,minimum_event_mentions=5,cut_off=2500):
-        dates = helpers.return_daterange(date_start,window_size)
-        tweet_count = sum([self.tweet_counts[date] for date in dates])
-        date_counts = sum([self.date_counts[date] for date in dates],Counter())
-        entity_counts = sum([self.entity_counts[date] for date in dates],Counter())
-        filtered_events = self.filter_events(self.prune_events(minimum_event_mentions))
-        events_score = self.score_events(filtered_events,tweet_count,date_counts,entity_counts)
-        ranked_events = self.rank_events(events_score,cut_off)
-        return ranked_events
+    def extract_events(self,minimum_event_mentions=5,cut_off=2500):
+        self.prune_events(minimum_event_mentions)
+        self.filter_events()
+        self.score_events()
+        self.rank_events(cut_off)
 
-    def discard_tweets(self,discard_date):
-        # discard tweets from events
-        for event in self.events:
-            print('before',len(event.tweets))
-            for tweet in event.date_tweets[discard_date]:
-                  event.tweets.remove(tweet)
-                  event.mentions-=1
-            del event.date_tweets[discard_date]
-            print('after',len(event.tweets))
-            if event.mentions == 0:
-                self.events.remove(event)
-        # discard counts 
-        del self.tweet_counts[discard_date]
-        del self.date_counts[discard_date]
-        del self.entity_counts[discard_date]
-        
-    def score_events(self,events,tweet_count,date_counts,entity_counts):
-        for event in events:
-            self.score_event(event,tweet_count,date_counts,entity_counts)
-        return events
+############################################################
+### Secondary functions
+############################################################
 
-    def score_event(self,event,tweet_count,date_counts,entity_counts):
-        date = event.datetime
-        entity = event.entities[0]
-        event_score = self.calculate_g2(tweet_count,date_counts[date],entity_counts[entity],event.mentions)
-        event.set_score(event_score)
+########## For adding tweets
 
-    def rank_events(self,events,cut_off):
-        ranked_events = sorted(self.events,key = lambda k: k.score,reverse=True)[:cut_off]
-        return ranked_events
+    def make_counts(self,tweet):
+        self.count_refdates(tweet)
+        self.count_entities(tweet)
 
+    def count_refdates(self,tweet):
+        dates = tweet.refdates
+        date_counts = self.list2unidict(dates,1)
+        self.date_counts.update(date_counts)
+
+    def count_entities(self,tweet):
+        entities = tweet.entities
+        entity_counts = self.list2unidict(entities,1)
+        self.entity_counts.update(entity_counts)
+   
     def list2unidict(self,l,uniform_value):
         return dict(zip(l,[uniform_value]*len(l)))
 
     def pair_lists(self,l1,l2):
         return list(product(l1,l2))
 
-    def calculate_expected(self,total_count,count_v1,count_v2):
-        return (count_v1 * count_v2) / total_count
 
-    def calculate_observed(self,combi,total_count,count_v1,count_v2,observed_v1_v2):
-        observed = observed_v1_v2 if combi.count('+') == 2 else total_count if combi.count('-') == 2 else count_v1 if combi[1] == '-' else count_v2
-        observed_subtract = 0 if combi.count('+') == 2 else (observed_v1_v2 + self.calculate_observed(['-','+'],total_count,count_v1,count_v2,observed_v1_v2) + self.calculate_observed(['+','-'],total_count,count_v1,count_v2,observed_v1_v2)) if combi.count('-') == 2 else observed_v1_v2
-        observed -= observed_subtract
-        return observed
+########## For scoring and ranking events
 
-    def calculate_fit(self,observed,expected):
-        try:
-            return observed * (math.log(observed/expected)/math.log(2))
-        except: # outcome is 0
-            return 0
+    def score_events(self):
+        for event in self.events:
+            self.score_event(event)
+
+    def score_event(self,event):
+        date = event.datetime
+        entity = event.entities[0]
+        event_score = self.calculate_g2(self.tweet_count,self.date_counts[date],self.entity_counts[entity],event.mentions)
+        event.set_score(event_score)
+
+    def rank_events(self,cut_off):
+        self.events = sorted(self.events,key = lambda k: k.score,reverse=True)[:cut_off]
 
     def calculate_g2(self,total_count,count_v1,count_v2,observed_v1_v2):
         g2 = 0
@@ -106,22 +95,33 @@ class EventRanker:
             g2 += fit
         return g2
 
-    def count_refdates(self,tweet):
-        dates = tweet.refdates
-        date_counts = self.list2unidict(dates,1)
-        self.date_counts[tweet.datetime.date()].update(date_counts)
+    def calculate_fit(self,observed,expected):
+        try:
+            return observed * (math.log(observed/expected)/math.log(2))
+        except: # outcome is 0
+            return 0
 
-    def count_entities(self,tweet):
-        entities = tweet.entities
-        entity_counts = self.list2unidict(entities,1)
-        self.entity_counts[tweet.datetime.date()].update(entity_counts)
-        
-    def make_counts(self,tweet):
-        self.count_refdates(tweet)
-        self.count_entities(tweet)
+    def calculate_expected(self,total_count,count_v1,count_v2):
+        return (count_v1 * count_v2) / total_count
+
+    def calculate_observed(self,combi,total_count,count_v1,count_v2,observed_v1_v2):
+        observed = observed_v1_v2 if combi.count('+') == 2 else total_count if combi.count('-') == 2 else count_v1 if combi[1] == '-' else count_v2
+        observed_subtract = 0 if combi.count('+') == 2 else (observed_v1_v2 + self.calculate_observed(['-','+'],total_count,count_v1,count_v2,observed_v1_v2) + self.calculate_observed(['+','-'],total_count,count_v1,count_v2,observed_v1_v2)) if combi.count('-') == 2 else observed_v1_v2
+        observed -= observed_subtract
+        return observed
+
+
+########## For pruning and filtering events 
 
     def prune_events(self,minimum_event_mentions):
-        return [event for event in self.events if event.mentions >= minimum_event_mentions]
+        self.events = [event for event in self.events if event.mentions >= minimum_event_mentions]
+
+    def filter_events(self,consistent_hashtag_threshold=2):
+        filtered_events = []
+        for event in self.events:
+            if not len(self.assess_hashtag_consistency(event)) >= consistent_hashtag_threshold:
+                filtered_events.append(event)
+        self.events = filtered_events
 
     def assess_hashtag_consistency(self,event):
         all_hashtags = sum([[x for x in tweet.entities if x[0] == '#'] for tweet in event.tweets],[])
@@ -129,10 +129,3 @@ class EventRanker:
         hashtag_count = dict([(hashtag,all_hashtags.count(hashtag)) for hashtag in all_unique_hashtags])
         consistent_hashtags = [hashtag for hashtag in hashtag_count.keys() if hashtag_count[hashtag] == event.mentions]
         return consistent_hashtags
-
-    def filter_events(self,events,consistent_hashtag_threshold=2):
-        filtered_events = []
-        for event in events:
-            if not len(self.assess_hashtag_consistency(event)) >= consistent_hashtag_threshold:
-                filtered_events.append(event)
-        return filtered_events
