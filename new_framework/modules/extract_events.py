@@ -198,15 +198,15 @@ class ExtractEventsTask(Task):
                     tweetobj = tweet.Tweet()
                     tweetobj.import_tweetdict(td)
                     er.add_tweet(tweetobj)
-                er.tweet_counts[date] += 1
+                er.tweet_counts += 1
 
         # extract events
         print('Performing event extraction')
-        ranked_events = er.extract_events(first_date,self.window_size,self.minimum_event_mentions,self.cut_off)
+        er.extract_events(self.minimum_event_mentions,self.cut_off)
 
-        print('Done. Extracted',len(ranked_events),'events')
+        print('Done. Extracted',len(er.events),'events')
 
         # write to file
-        outevents = [event.return_dict() for event in ranked_events]
+        outevents = [event.return_dict() for event in er.events]
         with open(self.out_events().path,'w',encoding='utf-8') as file_out:
             json.dump(outevents,file_out)
