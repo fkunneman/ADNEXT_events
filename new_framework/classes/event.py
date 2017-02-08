@@ -56,18 +56,15 @@ class Event:
     def add_mention(self,n=1):
         self.mentions += 1
 
-    # def add_tids(self,tids):
-    #     self.tids = tids
+    def merge(self,event):
+        self.score = max(self.score,event.score)
+        self.entities = list(set(self..entities + event.entities))
+        tweetids = [tweet.id for tweet in self.tweets]
+        self.tweets.extend([tweet for tweet in event.tweets if not tweet.id in tweetids])
+        self.mentions = len(self.tweets)
 
     # def set_periodics(self,events):
     #     self.periodics = events
-
-    # def merge(self,clust):
-    #     self.ids.extend(clust.ids)
-    #     self.entities.extend(clust.entities) 
-    #     self.entities = list(set(self.entities))
-    #     self.score = max([self.score,clust.score])
-    #     self.tweets = list(set(self.tweets + clust.tweets))
 
     # def resolve_overlap_entities(self):
     #     self.entities = calculations.resolve_overlap_entities(sorted(self.entities,key = lambda x : x[1],reverse=True))
